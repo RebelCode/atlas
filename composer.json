@@ -3,7 +3,6 @@
   "description": "A lightweight MySQL abstraction layer.",
   "type": "library",
   "license": "GPL-3.0",
-  "minimum-stability": "dev",
   "authors": [
     {
       "name": "Miguel Muscat",
