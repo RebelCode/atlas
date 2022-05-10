@@ -1,6 +1,6 @@
 {
   "name": "rebelcode/atlas",
-  "description": "A lightweight MySQL abstraction layer.",
+  "description": "A lightweight SQL generation library.",
   "type": "library",
   "license": "GPL-3.0",
   "authors": [
