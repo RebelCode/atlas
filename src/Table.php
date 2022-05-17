@@ -7,6 +7,10 @@ use RebelCode\Atlas\Exception\MissingQueryTypeException;
 use RebelCode\Atlas\Exception\NoTableSchemaException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Query\DeleteQuery;
+use RebelCode\Atlas\Query\InsertQuery;
+use RebelCode\Atlas\Query\SelectQuery;
+use RebelCode\Atlas\Query\UpdateQuery;
 use RebelCode\Atlas\QueryType\CreateIndex;
 use RebelCode\Atlas\QueryType\CreateTable;
 use RebelCode\Atlas\QueryType\Delete;
@@ -118,7 +122,7 @@ class Table
             );
         } else {
             $queries = [
-                $this->createQuery(QueryType::CREATE_TABLE, [
+                new Query($this->getQueryType(QueryType::CREATE_TABLE), [
                     CreateTable::NAME => $this->name,
                     CreateTable::SCHEMA => $this->schema,
                     CreateTable::IF_NOT_EXISTS => $ifNotExists,
@@ -127,7 +131,7 @@ class Table
             ];
 
             foreach ($this->schema->getIndexes() as $name => $index) {
-                $queries[] = $this->createQuery(QueryType::CREATE_INDEX, [
+                $queries[] = new Query($this->getQueryType(QueryType::CREATE_INDEX), [
                     CreateIndex::TABLE => $this->name,
                     CreateIndex::NAME => $name,
                     CreateIndex::INDEX => $index,
@@ -147,7 +151,7 @@ class Table
                 $this
             );
         } else {
-            return $this->createQuery(QueryType::DROP_TABLE, [
+            return new Query($this->getQueryType(QueryType::DROP_TABLE), [
                 DropTable::TABLE => $this->name,
                 DropTable::IF_EXISTS => $ifExists,
                 DropTable::CASCADE => $cascade,
@@ -162,8 +166,8 @@ class Table
         ?array $order = null,
         ?int $limit = null,
         ?int $offset = null
-    ): Query {
-        return $this->createQuery(QueryType::SELECT, [
+    ): SelectQuery {
+        return new SelectQuery($this->getQueryType(QueryType::SELECT), [
             Select::FROM => $this->name,
             Select::COLUMNS => empty($columns) ? ['*'] : $columns,
             Select::WHERE => $this->useWhereState($where),
@@ -177,15 +181,14 @@ class Table
      * Create an INSERT query.
      *
      * @param array<string, mixed>[] $records
-     * @return Query
      */
-    public function insert(array $records): Query
+    public function insert(array $records): InsertQuery
     {
         if (empty($records)) {
             throw new DomainException('List of values to insert is empty');
         }
 
-        return $this->createQuery(QueryType::INSERT, [
+        return new InsertQuery($this->getQueryType(QueryType::INSERT), [
             Insert::TABLE => $this->name,
             Insert::COLUMNS => array_keys($records[0]),
             Insert::VALUES => $records,
@@ -197,8 +200,8 @@ class Table
         ?ExprInterface $where = null,
         ?array $order = null,
         ?int $limit = null
-    ): Query {
-        return $this->createQuery(QueryType::SELECT, [
+    ): UpdateQuery {
+        return new UpdateQuery($this->getQueryType(QueryType::UPDATE), [
             Update::TABLE => $this->name,
             Update::SET => $set,
             Update::WHERE => $this->useWhereState($where),
@@ -211,8 +214,8 @@ class Table
         ?ExprInterface $where = null,
         ?array $order = null,
         ?int $limit = null
-    ): Query {
-        return $this->createQuery(QueryType::SELECT, [
+    ): DeleteQuery {
+        return new DeleteQuery($this->getQueryType(QueryType::DELETE), [
             Delete::FROM => $this->name,
             Delete::WHERE => $this->useWhereState($where),
             Delete::ORDER => $this->useOrderState($order),
@@ -220,8 +223,10 @@ class Table
         ]);
     }
 
-    /** Utility method for creating queries with the type extracted from config. */
-    protected function createQuery(string $typeKey, array $data): Query
+    /**
+     * Utility method for retrieving a query type from the config, throwing an exception if it's not found.
+     */
+    protected function getQueryType(string $typeKey): QueryTypeInterface
     {
         $type = $this->config->getQueryType($typeKey);
 
@@ -229,7 +234,7 @@ class Table
             throw new MissingQueryTypeException("Query type \"$typeKey\" is missing in config", $typeKey);
         }
 
-        return new Query($type, $data);
+        return $type;
     }
 
     protected function useWhereState(?ExprInterface $where): ?ExprInterface
