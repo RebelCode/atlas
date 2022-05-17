@@ -5,7 +5,7 @@ namespace RebelCode\Atlas\Test\QueryType;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Exception\QueryCompileException;
 use RebelCode\Atlas\Expression\ExprInterface;
-use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryType\Select;
@@ -124,6 +124,24 @@ class SelectTest extends TestCase
         ]);
 
         $expected = 'SELECT * FROM `test` WHERE foobar';
+        $actual = $select->compile($query);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testCompileSelectGroupBy()
+    {
+        $select = new Select();
+        $query = new Query($select, [
+            Select::FROM => 'test',
+            Select::GROUP => [
+                new Group('foo'),
+                new Group('bar', Group::ASC),
+                new Group('baz', Group::DESC),
+            ],
+        ]);
+
+        $expected = 'SELECT * FROM `test` GROUP BY `foo` ASC, `bar` ASC, `baz` DESC';
         $actual = $select->compile($query);
 
         $this->assertEquals($expected, $actual);

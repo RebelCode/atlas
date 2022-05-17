@@ -175,4 +175,34 @@ class QueryCompiler
             throw new InvalidArgumentException('WHERE is not an expression');
         }
     }
+
+    /**
+     * Compiles the GROUP BY fragment of an SQL query.
+     *
+     * @psalm-mutation-free
+     *
+     * @param mixed $groupList A list of {@link Group} instances.
+     * @return string
+     */
+    public static function compileGroupBy($groupList): string
+    {
+        if ($groupList !== null && !is_array($groupList)) {
+            throw new InvalidArgumentException('GROUP BY list is not an array');
+        }
+
+        if (empty($groupList)) {
+            return '';
+        }
+
+        $groupParts = [];
+        foreach ($groupList as $group) {
+            if ($group instanceof Group) {
+                $groupParts[] = "`{$group->getField()}` {$group->getSort()}";
+            } else {
+                throw new InvalidArgumentException('GROUP BY list contains a non-Group value');
+            }
+        }
+
+        return 'GROUP BY ' . implode(', ', $groupParts);
+    }
 }
