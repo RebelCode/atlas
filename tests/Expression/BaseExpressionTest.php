@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Expression\BaseExpr;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 
 class BaseExpressionTest extends TestCase
@@ -35,8 +36,6 @@ class BaseExpressionTest extends TestCase
             ['notIn', BinaryExpr::NOT_IN],
             ['like', BinaryExpr::LIKE],
             ['notLike', BinaryExpr::NOT_LIKE],
-            ['between', BinaryExpr::BETWEEN],
-            ['notBetween', BinaryExpr::NOT_BETWEEN],
             ['regexp', BinaryExpr::REGEXP],
             ['notRegexp', BinaryExpr::NOT_REGEXP],
             ['plus', BinaryExpr::PLUS],
@@ -66,6 +65,34 @@ class BaseExpressionTest extends TestCase
         $this->assertInstanceOf(BinaryExpr::class, $result, 'Result is not a binary expression instance');
         $this->assertSame($subject, $result->getLeft(), 'The left operand is not the subject');
         $this->assertSame($term, $result->getRight(), 'The right operand is not the argument');
+        $this->assertEquals($operator, $result->getOperator(), 'The operator is incorrect');
+    }
+
+    public function provideBetweenExprData(): array
+    {
+        return [
+            'between' => ['between', BinaryExpr::BETWEEN],
+            'not between' => ['notBetween', BinaryExpr::NOT_BETWEEN],
+        ];
+    }
+
+    /** @dataProvider provideBetweenExprData */
+    public function testBetweenExpr($method, $operator)
+    {
+        $subject = $this->getMockBuilder(BaseExpr::class)
+                        ->enableProxyingToOriginalMethods()
+                        ->getMockForAbstractClass();
+
+        $term1 = $this->createMock(ExprInterface::class);
+        $term2 = $this->createMock(ExprInterface::class);
+        $result = call_user_func_array([$subject, $method], [$term1, $term2]);
+
+        $right = $result->getRight();
+
+        $this->assertInstanceOf(BinaryExpr::class, $result, 'Result is not a binary expression instance');
+        $this->assertSame($subject, $result->getLeft(), 'The left operand is not the subject');
+        $this->assertInstanceOf(Term::class, $right, 'The right operand is not a term');
+        $this->assertEquals([$term1, $term2], $right->getValue(), 'The right operand is not an array of the arguments');
         $this->assertEquals($operator, $result->getOperator(), 'The operator is incorrect');
     }
 

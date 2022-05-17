@@ -80,14 +80,14 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::NOT_LIKE, Term::create($term));
     }
 
-    public function between($term): BinaryExpr
+    public function between($term1, $term2): BinaryExpr
     {
-        return new BinaryExpr($this, BinaryExpr::BETWEEN, Term::create($term));
+        return new BinaryExpr($this, BinaryExpr::BETWEEN, Term::create([$term1, $term2]));
     }
 
-    public function notBetween($term): BinaryExpr
+    public function notBetween($term1, $term2): BinaryExpr
     {
-        return new BinaryExpr($this, BinaryExpr::NOT_BETWEEN, Term::create($term));
+        return new BinaryExpr($this, BinaryExpr::NOT_BETWEEN, Term::create([$term1, $term2]));
     }
 
     public function regexp($term): BinaryExpr

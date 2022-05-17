@@ -35,9 +35,9 @@ interface ExprInterface
 
     public function notLike($term): BinaryExpr;
 
-    public function between($term): BinaryExpr;
+    public function between($term1, $term2): BinaryExpr;
 
-    public function notBetween($term): BinaryExpr;
+    public function notBetween($term1, $term2): BinaryExpr;
 
     public function regexp($term): BinaryExpr;
 
