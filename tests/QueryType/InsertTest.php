@@ -26,6 +26,22 @@ class InsertTest extends TestCase
         $this->assertEquals($expected, $insert->compile($query));
     }
 
+    public function testCompileStrings()
+    {
+        $insert = new Insert();
+        $query = new Query($insert, [
+            Insert::TABLE => 'foo',
+            Insert::COLUMNS => ['a', 'b', 'c'],
+            Insert::VALUES => [
+                ['hey', 'there', 'buddy'],
+            ],
+        ]);
+
+        $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES ('hey', 'there', 'buddy')";
+
+        $this->assertEquals($expected, $insert->compile($query));
+    }
+
     public function testCompileMultipleValues()
     {
         $insert = new Insert();
@@ -34,12 +50,12 @@ class InsertTest extends TestCase
             Insert::COLUMNS => ['a', 'b', 'c'],
             Insert::VALUES => [
                 [1, 2, 3],
-                ['"hey"', '"there"', '"buddy"'],
+                ['hey', 'there', 'buddy'],
                 [4, 5, 6],
             ],
         ]);
 
-        $expected = 'INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3), ("hey", "there", "buddy"), (4, 5, 6)';
+        $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3), ('hey', 'there', 'buddy'), (4, 5, 6)";
 
         $this->assertEquals($expected, $insert->compile($query));
     }

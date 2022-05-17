@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\QueryType;
 use DomainException;
 use InvalidArgumentException;
 use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryCompiler;
 use RebelCode\Atlas\QueryTypeInterface;
@@ -70,7 +71,12 @@ class Insert implements QueryTypeInterface
                         "Value set #$i has $numValues values, should have $numColumns"
                     );
                 } else {
-                    $valuesList[] = '(' . implode(', ', $record) . ')';
+                    $recordValues = [];
+                    foreach ($record as $value) {
+                        $recordValues[] = Term::create($value)->toString();
+                    }
+
+                    $valuesList[] = '(' . implode(', ', $recordValues) . ')';
                 }
             }
         }
