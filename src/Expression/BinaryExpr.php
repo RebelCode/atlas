@@ -2,6 +2,8 @@
 
 namespace RebelCode\Atlas\Expression;
 
+use DomainException;
+
 /** @psalm-immutable */
 class BinaryExpr extends BaseExpr
 {
@@ -35,13 +37,10 @@ class BinaryExpr extends BaseExpr
     const AND = 'AND';
     const OR = 'OR';
     const XOR = 'XOR';
-
     /** @var ExprInterface */
     protected $left;
-
     /** @var string */
     protected $operator;
-
     /** @var ExprInterface */
     protected $right;
 
@@ -71,8 +70,20 @@ class BinaryExpr extends BaseExpr
     public function toString(): string
     {
         $left = $this->left->toString();
-        $right = $this->right->toString();
 
-        return "($left $this->operator $right)";
+        if ($this->operator === self::BETWEEN || $this->operator === self::NOT_BETWEEN) {
+            if (!$this->right instanceof Term || !is_array($value = $this->right->getValue())) {
+                throw new DomainException('Right operand of ' . $this->operator . ' expression is not an array term');
+            }
+
+            $between1 = $value[0]->toString();
+            $between2 = $value[1]->toString();
+
+            return "($left $this->operator $between1 AND $between2)";
+        } else {
+            $right = $this->right->toString();
+
+            return "($left $this->operator $right)";
+        }
     }
 }
