@@ -18,7 +18,7 @@ class BaseExpressionTest extends TestCase
         $this->assertInstanceOf(ExprInterface::class, $subject);
     }
 
-    public function provideBinaryExpData(): array
+    public function provideBinaryExprData(): array
     {
         return [
             ['and', BinaryExpr::AND],
@@ -52,7 +52,7 @@ class BaseExpressionTest extends TestCase
         ];
     }
 
-    /** @dataProvider provideBinaryExpData */
+    /** @dataProvider provideBinaryExprData */
     public function testBinaryExpr(string $method, string $operator)
     {
         $subject = $this->getMockBuilder(BaseExpr::class)
