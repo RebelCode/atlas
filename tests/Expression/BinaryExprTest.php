@@ -33,17 +33,51 @@ class BinaryExprTest extends TestCase
         $this->assertEquals($operator, $expr->getOperator());
     }
 
-    public function testToString()
+    public function provideToStringData() : array
+    {
+        return [
+            'and' => [BinaryExpr::AND],
+            'or' => [BinaryExpr::OR],
+            'xor' => [BinaryExpr::XOR],
+            'equals' => [BinaryExpr::EQ],
+            'notEquals' => [BinaryExpr::NEQ],
+            'gt' => [BinaryExpr::GT],
+            'lt' => [BinaryExpr::LT],
+            'gte' => [BinaryExpr::GTE],
+            'lte' => [BinaryExpr::LTE],
+            'is' => [BinaryExpr::IS],
+            'isNot' => [BinaryExpr::IS_NOT],
+            'in' => [BinaryExpr::IN],
+            'notIn' => [BinaryExpr::NOT_IN],
+            'like' => [BinaryExpr::LIKE],
+            'notLike' => [BinaryExpr::NOT_LIKE],
+            'regexp' => [BinaryExpr::REGEXP],
+            'notRegexp' => [BinaryExpr::NOT_REGEXP],
+            'plus' => [BinaryExpr::PLUS],
+            'minus' => [BinaryExpr::MINUS],
+            'mult' => [BinaryExpr::MULT],
+            'div' => [BinaryExpr::DIV],
+            'intDiv' => [BinaryExpr::INT_DIV],
+            'mod' => [BinaryExpr::MOD],
+            'leftShift' => [BinaryExpr::L_SHIFT],
+            'rightShift' => [BinaryExpr::R_SHIFT],
+            'bitwiseAnd' => [BinaryExpr::B_AND],
+            'bitwiseOr' => [BinaryExpr::B_OR],
+            'bitwiseXor' => [BinaryExpr::B_XOR],
+        ];
+    }
+
+    /** @dataProvider provideToStringData */
+    public function testToString($operator)
     {
         $left = $this->createMock(ExprInterface::class);
         $right = $this->createMock(ExprInterface::class);
-        $operator = BinaryExpr::PLUS;
 
         $left->expects($this->once())->method('toString')->willReturn('foo');
         $right->expects($this->once())->method('toString')->willReturn('bar');
 
         $expr = new BinaryExpr($left, $operator, $right);
 
-        $this->assertEquals('(foo + bar)', $expr->toString());
+        $this->assertEquals("(foo $operator bar)", $expr->toString());
     }
 }
