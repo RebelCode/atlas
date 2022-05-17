@@ -147,6 +147,23 @@ class SelectTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testCompileSelectHaving()
+    {
+        $expr = $this->createMock(ExprInterface::class);
+        $expr->expects($this->once())->method('toString')->willReturn('foobar');
+
+        $select = new Select();
+        $query = new Query($select, [
+            Select::FROM => 'test',
+            Select::HAVING => $expr,
+        ]);
+
+        $expected = 'SELECT * FROM `test` HAVING foobar';
+        $actual = $select->compile($query);
+
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testCompileSelectOrder()
     {
         $select = new Select();

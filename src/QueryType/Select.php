@@ -16,6 +16,7 @@ class Select implements QueryTypeInterface
     public const COLUMNS = 'columns';
     public const WHERE = 'where';
     public const GROUP = 'group';
+    public const HAVING = 'having';
     public const LIMIT = 'limit';
     public const OFFSET = 'offset';
     public const ORDER = 'order';
@@ -27,6 +28,7 @@ class Select implements QueryTypeInterface
             $columns = $query->get(self::COLUMNS, ['*']);
             $where = $query->get(self::WHERE);
             $group = $query->get(self::GROUP);
+            $having = $query->get(self::HAVING);
             $limit = $query->get(self::LIMIT);
             $offset = $query->get(self::OFFSET);
             $order = $query->get(self::ORDER, []);
@@ -42,6 +44,7 @@ class Select implements QueryTypeInterface
                 QueryCompiler::compileFrom($from, null, true),
                 QueryCompiler::compileWhere($where),
                 QueryCompiler::compileGroupBy($group),
+                QueryCompiler::compileHaving($having),
                 QueryCompiler::compileOrder($order),
                 QueryCompiler::compileLimit($limit),
                 QueryCompiler::compileOffset($offset),

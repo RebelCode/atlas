@@ -205,4 +205,23 @@ class QueryCompiler
 
         return 'GROUP BY ' . implode(', ', $groupParts);
     }
+
+    /**
+     * Compiles the HAVING fragment of an SQL query.
+     *
+     * @psalm-mutation-free
+     *
+     * @param mixed $having An {@link ExprInterface} instance.
+     * @return string
+     */
+    public static function compileHaving($having): string
+    {
+        if ($having instanceof ExprInterface) {
+            return 'HAVING ' . $having->toString();
+        } elseif ($having === null) {
+            return '';
+        } else {
+            throw new InvalidArgumentException('HAVING is not an expression');
+        }
+    }
 }
