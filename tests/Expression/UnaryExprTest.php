@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Test\Expression;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Expression\BaseExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 
 class UnaryExprTest extends TestCase
@@ -49,5 +50,12 @@ class UnaryExprTest extends TestCase
         $expr = new UnaryExpr('SUM', $operand);
 
         $this->assertEquals('SUM(foo)', $expr->toString());
+    }
+
+    public function testToStringFunctionNameDistinct()
+    {
+        $expr = new UnaryExpr('SUM', Term::column('foo')->distinct());
+
+        $this->assertEquals('SUM(DISTINCT `foo`)', $expr->toString());
     }
 }

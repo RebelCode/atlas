@@ -23,18 +23,23 @@ class Term extends BaseExpr
      */
     protected $type;
 
+    /** @var bool */
+    protected $distinct;
+
     /**
      * Constructor.
      *
      * @param int $type The term's type. See the constants in this class.
      * @param mixed $value The value.
+     * @param bool $distinct Whether the column is distinct or not. Only for terms of type {@link Term::COLUMN}.
      *
      * @psalm-param Term::* $type
      */
-    public function __construct(int $type, $value)
+    public function __construct(int $type, $value, bool $distinct = false)
     {
         $this->value = $value;
         $this->type = $type;
+        $this->distinct = $distinct;
     }
 
     /** @psalm-return Term::* */
@@ -47,6 +52,18 @@ class Term extends BaseExpr
     public function getValue()
     {
         return $this->value;
+    }
+
+    public function isDistinct(): bool
+    {
+        return $this->distinct;
+    }
+
+    public function distinct(bool $distinct = true): self
+    {
+        return $distinct === $this->distinct
+            ? $this
+            : new self($this->type, $this->value, $distinct);
     }
 
     /** @psalm-suppress PossiblyInvalidCast */

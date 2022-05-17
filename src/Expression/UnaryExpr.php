@@ -35,6 +35,11 @@ class UnaryExpr extends BaseExpr
     public function toString(): string
     {
         $term = $this->operand->toString();
-        return "$this->operator($term)";
+
+        $isColumn = ($this->operand instanceof Term && $this->operand->getType() === Term::COLUMN);
+        $isDistinct = $isColumn && $this->operand->isDistinct();
+        $distinct = $isDistinct ? 'DISTINCT ' : '';
+
+        return "$this->operator($distinct$term)";
     }
 }

@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Test\QueryType;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Exception\QueryCompileException;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
@@ -50,6 +51,23 @@ class SelectTest extends TestCase
         ]);
 
         $expected = 'SELECT `foo` AS `bar`, `baz`, `qux` AS `quuz` FROM `test`';
+        $actual = $select->compile($query);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testCompileSelectColumnsWithDistinct()
+    {
+        $select = new Select();
+        $query = new Query($select, [
+            Select::FROM => 'test',
+            Select::COLUMNS => [
+                Term::column('foo')->distinct()->fn('COUNT'),
+                'bar'
+            ],
+        ]);
+
+        $expected = 'SELECT COUNT(DISTINCT `foo`), `bar` FROM `test`';
         $actual = $select->compile($query);
 
         $this->assertEquals($expected, $actual);
