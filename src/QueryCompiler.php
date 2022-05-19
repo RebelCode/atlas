@@ -224,4 +224,31 @@ class QueryCompiler
             throw new InvalidArgumentException('HAVING is not an expression');
         }
     }
+
+    /**
+     * Compiles an assignment list. Used by "UPDATE" and "INSERT ... ON DUPLICATE KEY" queries.
+     *
+     * @psalm-mutation-free
+     *
+     * @param mixed $assignList An associative array that maps column names to their values, which can be either scalar
+     *                          values or {@link ExprInterface} instances.
+     * @return string
+     */
+    public static function compileAssignmentList($assignList): string
+    {
+        if ($assignList !== null && !is_array($assignList)) {
+            throw new InvalidArgumentException('Assignment list is not an array');
+        }
+
+        if (empty($assignList)) {
+            return '';
+        }
+
+        $list = [];
+        foreach ($assignList as $col => $value) {
+            $list[] = "`$col` = " . Term::create($value)->toString();
+        }
+
+        return 'SET ' . implode(', ', $list);
+    }
 }
