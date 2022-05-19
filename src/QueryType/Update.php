@@ -2,9 +2,7 @@
 
 namespace RebelCode\Atlas\QueryType;
 
-use InvalidArgumentException;
 use RebelCode\Atlas\Exception\QueryCompileException;
-use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryCompiler;
 use RebelCode\Atlas\QueryTypeInterface;
