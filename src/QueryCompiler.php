@@ -226,15 +226,16 @@ class QueryCompiler
     }
 
     /**
-     * Compiles an assignment list. Used by "UPDATE" and "INSERT ... ON DUPLICATE KEY" queries.
+     * Compiles an assignment list. Used by "UPDATE" and "INSERT ... ON DUPLICATE KEY UPDATE" queries.
      *
      * @psalm-mutation-free
      *
+     * @param string $prefix    The prefix for the compiled fragment. Typically, either SET or UPDATE.
      * @param mixed $assignList An associative array that maps column names to their values, which can be either scalar
      *                          values or {@link ExprInterface} instances.
      * @return string
      */
-    public static function compileAssignmentList($assignList): string
+    public static function compileAssignmentList(string $prefix, $assignList): string
     {
         if ($assignList !== null && !is_array($assignList)) {
             throw new InvalidArgumentException('Assignment list is not an array');
@@ -249,6 +250,6 @@ class QueryCompiler
             $list[] = "`$col` = " . Term::create($value)->toString();
         }
 
-        return 'SET ' . implode(', ', $list);
+        return $prefix . ' ' . implode(', ', $list);
     }
 }

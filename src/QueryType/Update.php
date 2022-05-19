@@ -27,7 +27,7 @@ class Update implements QueryTypeInterface
             $order = $query->get(self::ORDER, []);
             $limit = $query->get(self::LIMIT);
 
-            $updateSet = QueryCompiler::compileAssignmentList($set);
+            $updateSet = QueryCompiler::compileAssignmentList('SET', $set);
             if (empty($updateSet)) {
                 throw new \DomainException('UPDATE SET is missing');
             }
