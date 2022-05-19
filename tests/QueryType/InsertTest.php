@@ -2,10 +2,11 @@
 
 namespace RebelCode\Atlas\Test\QueryType;
 
+use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryType\Insert;
-use PHPUnit\Framework\TestCase;
 use stdClass;
 
 class InsertTest extends TestCase
@@ -162,5 +163,27 @@ class InsertTest extends TestCase
         } catch (QueryCompileException $e) {
             $this->assertSame($query, $e->getQuery(), "The exception's query is invalid");
         }
+    }
+
+    public function testCompileOnDuplicateKey()
+    {
+        $bExpr = $this->createMock(ExprInterface::class);
+        $bExpr->expects($this->once())->method('toString')->willReturn('BBB');
+
+        $insert = new Insert();
+        $query = new Query($insert, [
+            Insert::TABLE => 'foo',
+            Insert::COLUMNS => ['a', 'b', 'c'],
+            Insert::VALUES => [[1, 2, 3]],
+            Insert::ON_DUPLICATE_KEY => [
+                'a' => 'A',
+                'b' => $bExpr,
+            ]
+        ]);
+
+        $actual = $insert->compile($query);
+        $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3) ON DUPLICATE KEY UPDATE `a` = 'A', `b` = BBB";
+
+        $this->assertEquals($expected, $actual);
     }
 }

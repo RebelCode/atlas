@@ -19,6 +19,7 @@ class Insert implements QueryTypeInterface
     public const TABLE = 'table';
     public const COLUMNS = 'columns';
     public const VALUES = 'values';
+    public const ON_DUPLICATE_KEY = 'on_duplicate';
 
     /** @inheritDoc */
     public function compile(Query $query): string
@@ -38,7 +39,14 @@ class Insert implements QueryTypeInterface
             $values = $query->get(self::VALUES);
             $valuesStr = self::compileInsertValues($values, $numColumns);
 
-            return "INSERT INTO `$table` ({$columnsStr}) VALUES {$valuesStr}";
+            $result = "INSERT INTO `$table` ({$columnsStr}) VALUES {$valuesStr}";
+
+            $assignList = $query->get(self::ON_DUPLICATE_KEY);
+            if (!empty($assignList)) {
+                $result .= ' ON DUPLICATE KEY ' . QueryCompiler::compileAssignmentList('UPDATE', $assignList);
+            }
+
+            return $result;
         } catch (Throwable $e) {
             throw new QueryCompileException('Cannot compile INSERT query - ' . $e->getMessage(), $query, $e);
         }

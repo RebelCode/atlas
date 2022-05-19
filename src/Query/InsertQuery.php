@@ -27,4 +27,10 @@ class InsertQuery extends Query
     {
         return $this->withAddedData([Insert::VALUES => $values]);
     }
+
+    /** @param array<string, mixed> $assignList */
+    public function onDuplicateKey(array $assignList): self
+    {
+        return $this->withAddedData([Insert::ON_DUPLICATE_KEY => $assignList]);
+    }
 }

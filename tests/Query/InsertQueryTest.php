@@ -20,6 +20,7 @@ class InsertQueryTest extends TestCase
             'into' => [Insert::TABLE, 'into', 'foo', 'bar'],
             'columns' => [Insert::COLUMNS, 'columns', ['foo', 'bar'], ['baz', 'qux']],
             'values' => [Insert::VALUES, 'values', ['foo', 'bar'], ['baz', 'qux']],
+            'onDuplicate' => [Insert::ON_DUPLICATE_KEY, 'onDuplicateKey', ['a' => 1, 'b' => 2], ['c' => 3, 'd' => 4]],
         ];
     }
 

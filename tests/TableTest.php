@@ -374,4 +374,58 @@ class TableTest extends TestCase
 
         $this->assertEquals([$order1, $order2, $order3, $order4], $query->get(QueryType\Select::ORDER));
     }
+
+    public function testInsertColumns()
+    {
+        $config = $this->createMock(Config::class);
+        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
+
+        $values = [
+            ['a' => 1, 'b' => 2, 'c' => 3],
+            ['d' => 4, 'e' => 5, 'f' => 6],
+        ];
+
+        $table = new Table($config, 'test');
+        $query = $table->insert($values);
+
+        $this->assertEquals(['a', 'b', 'c'], $query->get(QueryType\Insert::COLUMNS));
+    }
+
+    public function testInsertValues()
+    {
+        $config = $this->createMock(Config::class);
+        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
+
+        $values = [
+            ['a' => 1, 'b' => 2, 'c' => 3],
+            ['a' => 4, 'b' => 5, 'd' => 6],
+        ];
+
+        $table = new Table($config, 'test');
+        $query = $table->insert($values);
+
+        $this->assertEquals($values, $query->get(QueryType\Insert::VALUES));
+    }
+
+    public function testInsertOnDuplicateKey()
+    {
+        $config = $this->createMock(Config::class);
+        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
+
+        $records = [
+            ['a' => 1, 'b' => 2, 'c' => 3],
+            ['d' => 4, 'e' => 5, 'f' => 6],
+        ];
+
+        $assignList = [
+            'a' => 'A',
+            'b' => $this->createMock(ExprInterface::class),
+            'c' => 88.8,
+        ];
+
+        $table = new Table($config, 'test');
+        $query = $table->insert($records, $assignList);
+
+        $this->assertEquals($assignList, $query->get(QueryType\Insert::ON_DUPLICATE_KEY));
+    }
 }

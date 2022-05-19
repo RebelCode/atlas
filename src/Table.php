@@ -181,8 +181,9 @@ class Table
      * Create an INSERT query.
      *
      * @param array<string, mixed>[] $records
+     * @param array<string, mixed> $assignList
      */
-    public function insert(array $records): InsertQuery
+    public function insert(array $records, array $assignList = []): InsertQuery
     {
         if (empty($records)) {
             throw new DomainException('List of values to insert is empty');
@@ -192,6 +193,7 @@ class Table
             Insert::TABLE => $this->name,
             Insert::COLUMNS => array_keys($records[0]),
             Insert::VALUES => $records,
+            Insert::ON_DUPLICATE_KEY => $assignList,
         ]);
     }
 
