@@ -244,4 +244,47 @@ class QueryCompilerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         QueryCompiler::compileWhere($value);
     }
+
+    public function testCompileAssignmentList()
+    {
+        $expr = $this->createMock(ExprInterface::class);
+        $expr->expects($this->once())->method('toString')->willReturn('foobar');
+
+        $actual = QueryCompiler::compileAssignmentList('test', [
+            'foo' => $expr,
+            'bar' => 'BAR',
+            'baz' => 23,
+        ]);
+
+        $expected = "test `foo` = foobar, `bar` = 'BAR', `baz` = 23";
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testCompileAssignmentListEmpty()
+    {
+        $actual = QueryCompiler::compileAssignmentList('test', []);
+
+        $this->assertEmpty($actual);
+    }
+
+    function provideInvalidAssignmentList(): array
+    {
+        return [
+            'int' => [23],
+            'float' => [23.04],
+            'string' => ['test'],
+            'true' => [true],
+            'false' => [false],
+            'object' => [new stdClass()],
+        ];
+    }
+
+    /** @dataProvider provideInvalidAssignmentList */
+    public function testCompileAssignmentListInvalid($value)
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        QueryCompiler::compileAssignmentList('test', $value);
+    }
 }
