@@ -118,4 +118,12 @@ class BaseExpressionTest extends TestCase
         $this->assertSame($subject, $result->getOperand(), 'The operand is not the subject');
         $this->assertEquals($operator, $result->getOperator(), 'The operator is incorrect');
     }
+
+    public function testCastString()
+    {
+        $term = $this->createPartialMock(BaseExpr::class, ['toString']);
+        $term->expects($this->once())->method('toString')->willReturn('69');
+
+        $this->assertIsString((string) $term);
+    }
 }

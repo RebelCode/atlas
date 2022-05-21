@@ -2,6 +2,8 @@
 
 namespace RebelCode\Atlas\Expression;
 
+use Throwable;
+
 /** @psalm-immutable */
 abstract class BaseExpr implements ExprInterface
 {
@@ -173,5 +175,18 @@ abstract class BaseExpr implements ExprInterface
     public function fn(string $fn): UnaryExpr
     {
         return new UnaryExpr($fn, $this);
+    }
+
+    public function __toString(): string
+    {
+        if (version_compare(PHP_VERSION, '7.4.0', '<')) {
+            try {
+                return $this->toString();
+            } catch (Throwable $throwable) {
+                return '';
+            }
+        } else {
+            return $this->toString();
+        }
     }
 }

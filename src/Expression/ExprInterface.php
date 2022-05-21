@@ -72,4 +72,6 @@ interface ExprInterface
     public function neg(): UnaryExpr;
 
     public function toString(): string;
+
+    public function __toString(): string;
 }
