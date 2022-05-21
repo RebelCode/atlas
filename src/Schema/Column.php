@@ -2,13 +2,16 @@
 
 namespace RebelCode\Atlas\Schema;
 
+use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\Term;
+
 /** @psalm-immutable */
 class Column
 {
     /** @var string */
     protected $type;
 
-    /** @var string|null */
+    /** @var ExprInterface|null */
     protected $defaultValue;
 
     /** @var bool */
@@ -21,18 +24,18 @@ class Column
      * Construct a new column.
      *
      * @param string $type The data type for the column.
-     * @param string|null $defaultVal Optional default value.
+     * @param Term|mixed|null $defaultVal Optional default value.
      * @param bool $isNullable Whether values in the column can be NULL.
      * @param bool $autoInc Whether values in the column auto increments.
      */
     public function __construct(
         string $type,
-        ?string $defaultVal = null,
+        $defaultVal = null,
         bool $isNullable = true,
         bool $autoInc = false
     ) {
         $this->type = $type;
-        $this->defaultValue = $defaultVal;
+        $this->defaultValue = $defaultVal !== null ? Term::create($defaultVal): null;
         $this->isNullable = $isNullable;
         $this->autoInc = $autoInc;
     }
@@ -42,7 +45,7 @@ class Column
         return $this->type;
     }
 
-    public function getDefaultValue(): ?string
+    public function getDefaultValue(): ?ExprInterface
     {
         return $this->defaultValue;
     }
@@ -65,11 +68,14 @@ class Column
         return $clone;
     }
 
-    /** @return static */
-    public function default(?string $defaultVal): self
+    /**
+     * @param Term|mixed|null $defaultVal
+     * @return static
+     */
+    public function default($defaultVal): self
     {
         $clone = clone $this;
-        $clone->defaultValue = $defaultVal;
+        $clone->defaultValue = $defaultVal !== null ? Term::create($defaultVal): null;
         return $clone;
     }
 

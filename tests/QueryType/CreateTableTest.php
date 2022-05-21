@@ -128,7 +128,7 @@ QUERY;
             CreateTable::SCHEMA => new Schema([
                 'foo' => new Column('INT', null, false, true),
                 'bar' => new Column('VARCHAR(10)', null, true),
-                'baz' => new Column('REAL', '6.9', false, false),
+                'baz' => new Column('REAL', 6.9, false, false),
             ]),
         ]);
 

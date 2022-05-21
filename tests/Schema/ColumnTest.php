@@ -3,6 +3,8 @@
 namespace RebelCode\Atlas\Test\Schema;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Schema\Column;
 
 class ColumnTest extends TestCase
@@ -22,7 +24,7 @@ class ColumnTest extends TestCase
         $column = new Column('test', 'foobar', true, true);
 
         $this->assertEquals('test', $column->getType(), 'The type was not properly set by the ctor');
-        $this->assertEquals('foobar', $column->getDefaultValue(), 'The default value was not properly set by the ctor');
+        $this->assertInstanceOf(ExprInterface::class, $column->getDefaultValue(), 'The default value is not an expression');
         $this->assertTrue($column->getIsNullable(), 'The nullability flag was not properly set by the ctor');
         $this->assertTrue($column->getIsAutoInc(), 'The auto-increment flag was not properly set by the ctor');
     }
@@ -41,8 +43,9 @@ class ColumnTest extends TestCase
         $column = new Column('test', $def = 'foobar', true, true);
         $clone = $column->default($newDef = 'hiMom');
 
-        $this->assertEquals($newDef, $clone->getDefaultValue(), 'The new default value was not set in the clone');
-        $this->assertEquals($def, $column->getDefaultValue(), 'The original instance should not be mutated');
+        $this->assertInstanceOf(Term::class, $clone->getDefaultValue(), 'The new default value is not a Term');
+        $this->assertEquals($newDef, $clone->getDefaultValue()->getValue(), 'The new default value was not set in the clone');
+        $this->assertEquals($def, $column->getDefaultValue()->getValue(), 'The original instance should not be mutated');
     }
 
     public function testWithDefaultValueNull()
@@ -51,7 +54,7 @@ class ColumnTest extends TestCase
         $clone = $column->default(null);
 
         $this->assertNull($clone->getDefaultValue(), 'The default value in the clone was not set to null');
-        $this->assertEquals($def, $column->getDefaultValue(), 'The original instance should not be mutated');
+        $this->assertEquals($def, $column->getDefaultValue()->getValue(), 'The original instance should not be mutated');
     }
 
     public function testWithIsNullableFalse()
