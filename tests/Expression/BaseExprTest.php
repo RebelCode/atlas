@@ -9,7 +9,7 @@ use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 
-class BaseExpressionTest extends TestCase
+class BaseExprTest extends TestCase
 {
     public function testIsExpression()
     {
