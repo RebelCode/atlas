@@ -1,5 +1,10 @@
 # Atlas
 
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rebelcode/atlas/Continuous%20Integration?style=flat-square)][github-ci]
+[![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/rebelcode/atlas?style=flat-square)][packagist]
+[![Packagist Version](https://img.shields.io/packagist/v/rebelcode/atlas?style=flat-square)][packagist]
+[![Packagist License](https://img.shields.io/packagist/l/rebelcode/atlas?style=flat-square)][packagist]
+
 A lightweight SQL builder library without any query execution or database connection requirements.
 
 The primary goals of this package are:
@@ -537,3 +542,7 @@ The name is ironic.
 The package is meant to be "lightweight" - we're not sure what the threshold for that criteria is. So we named the
 package after [Atlas](https://en.wikipedia.org/wiki/Atlas_(mythology)), the Greek god that holds up the world on his
 shoulders. Because well ... presumably, the world is pretty heavy, even for a god.
+
+
+[github-ci]: https://github.com/RebelCode/wp-http/actions/workflows/continuous-integration.yml
+[packagist]: https://packagist.org/packages/rebelcode/wp-http
