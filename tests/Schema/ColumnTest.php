@@ -107,4 +107,11 @@ class ColumnTest extends TestCase
         $this->assertTrue($clone->getIsAutoInc(), 'The auto-increment flag in the clone was not set to true');
         $this->assertFalse($column->getIsAutoInc(), 'The original instance should not be mutated');
     }
+
+    public function testStaticOfType()
+    {
+        $column = Column::ofType('TEST');
+
+        $this->assertEquals('TEST', $column->getType(), 'The type was not properly set');
+    }
 }

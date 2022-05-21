@@ -88,4 +88,10 @@ class Column
         $clone->autoInc = $autoInc;
         return $clone;
     }
+
+    /** Helper static method to aid fluent creation of columns. */
+    public static function ofType(string $type): self
+    {
+        return new self($type);
+    }
 }
