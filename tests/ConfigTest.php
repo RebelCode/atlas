@@ -2,9 +2,10 @@
 
 namespace RebelCode\Atlas\Test;
 
-use RebelCode\Atlas\Config;
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Config;
 use RebelCode\Atlas\QueryType;
+use RebelCode\Atlas\QueryType\CreateIndex;
 use RebelCode\Atlas\QueryType\CreateTable;
 use RebelCode\Atlas\QueryType\Delete;
 use RebelCode\Atlas\QueryType\DropTable;
@@ -30,6 +31,7 @@ class ConfigTest extends TestCase
         $config = Config::createDefault();
 
         $this->assertInstanceOf(CreateTable::class, $config->getQueryType(QueryType::CREATE_TABLE));
+        $this->assertInstanceOf(CreateIndex::class, $config->getQueryType(QueryType::CREATE_INDEX));
         $this->assertInstanceOf(DropTable::class, $config->getQueryType(QueryType::DROP_TABLE));
         $this->assertInstanceOf(Select::class, $config->getQueryType(QueryType::SELECT));
         $this->assertInstanceOf(Insert::class, $config->getQueryType(QueryType::INSERT));
