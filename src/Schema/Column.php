@@ -42,47 +42,47 @@ class Column
         return $this->type;
     }
 
+    public function getDefaultValue(): ?string
+    {
+        return $this->defaultValue;
+    }
+
+    public function getIsNullable(): bool
+    {
+        return $this->isNullable;
+    }
+
+    public function getIsAutoInc(): bool
+    {
+        return $this->autoInc;
+    }
+
     /** @return static */
-    public function withType(string $type): self
+    public function type(string $type): self
     {
         $clone = clone $this;
         $clone->type = $type;
         return $clone;
     }
 
-    public function getDefaultValue(): ?string
-    {
-        return $this->defaultValue;
-    }
-
     /** @return static */
-    public function withDefaultVal(?string $defaultVal): self
+    public function default(?string $defaultVal): self
     {
         $clone = clone $this;
         $clone->defaultValue = $defaultVal;
         return $clone;
     }
 
-    public function isNullable(): bool
-    {
-        return $this->isNullable;
-    }
-
     /** @return static */
-    public function withIsNullable(bool $isNullable): self
+    public function nullable(bool $isNullable = true): self
     {
         $clone = clone $this;
         $clone->isNullable = $isNullable;
         return $clone;
     }
 
-    public function isAutoInc(): bool
-    {
-        return $this->autoInc;
-    }
-
     /** @return static */
-    public function withAutoInc(bool $autoInc): self
+    public function autoInc(bool $autoInc = true): self
     {
         $clone = clone $this;
         $clone->autoInc = $autoInc;

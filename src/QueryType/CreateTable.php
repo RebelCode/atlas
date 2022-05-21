@@ -76,10 +76,10 @@ class CreateTable implements QueryTypeInterface
             if ($defaultVal !== null) {
                 $parts[] = "DEFAULT $defaultVal";
             } else {
-                $parts[] = $column->isNullable() ? 'NULL' : 'NOT NULL';
+                $parts[] = $column->getIsNullable() ? 'NULL' : 'NOT NULL';
             }
 
-            if ($column->isAutoInc()) {
+            if ($column->getIsAutoInc()) {
                 $parts[] = 'AUTO_INCREMENT';
             }
 
