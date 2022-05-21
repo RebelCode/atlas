@@ -12,6 +12,7 @@ use RebelCode\Atlas\QueryType;
 use RebelCode\Atlas\QueryType\CreateIndex;
 use RebelCode\Atlas\QueryType\CreateTable;
 use RebelCode\Atlas\QueryType\DropTable;
+use RebelCode\Atlas\QueryTypeInterface;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Table;
 
@@ -427,5 +428,22 @@ class TableTest extends TestCase
         $query = $table->insert($records, $assignList);
 
         $this->assertEquals($assignList, $query->get(QueryType\Insert::ON_DUPLICATE_KEY));
+    }
+
+    public function testQuery()
+    {
+        $type = $this->createMock(QueryTypeInterface::class);
+
+        $config = $this->createMock(Config::class);
+        $config->method('getQueryType')->with('custom')->willReturn($type);
+
+        $table = new Table($config, 'foobar');
+        $query = $table->query('custom', [
+            'data' => 123
+        ]);
+
+        $this->assertSame($type, $query->getType());
+        $this->assertEquals('foobar', $query->get('table'));
+        $this->assertEquals(123, $query->get('data'));
     }
 }

@@ -225,6 +225,14 @@ class Table
         ]);
     }
 
+    /** @param array<string, mixed> $data */
+    public function query(string $type, array $data): Query
+    {
+        return new Query($this->getQueryType($type), array_merge($data, [
+            'table' => $this->name,
+        ]));
+    }
+
     /**
      * Utility method for retrieving a query type from the config, throwing an exception if it's not found.
      */
