@@ -35,11 +35,8 @@ $users = $atlas->table('users');
 $logs = $atlas->table('logs');
 ```
 
-Note: _The `Atlas::table()` method creates table objects on-demand if they don't exist, and will return the same
-instance on
-subsequent calls. If you prefer explicit control over this behavior, you can use the `Atlas::getTable()` (which doesn't
-automatically create table instances) and the `Atlas::addTable()` (which will override existing tables with the
-same name)._
+The `Atlas::table()` method creates table objects on-demand if they don't exist, and will return the same instance
+on subsequent calls.
 
 The large majority of Atlas' API is available from table objects:
 
