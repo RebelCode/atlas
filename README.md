@@ -9,9 +9,10 @@ A lightweight SQL builder library without any query execution or database connec
 
 The primary goals of this package are:
 
-1. To provide an easy-to-use, yet flexible, API for building SQL queries
-2. To allow customization without polluting the API with all possibilities
-3. To be dependency injection friendly
+1. To provide an easy-to-use, yet flexible, API for building SQL queries,
+2. To allow customization without polluting the API with all possibilities,
+3. To be independent of database connections and query execution - just build SQL,
+4. To be dependency-injection friendly.
 
 ## Installation
 
