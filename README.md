@@ -28,7 +28,6 @@ Start by creating an `Atlas` instance, then create table helper objects:
 
 ```php
 use RebelCode\Atlas\Atlas;
-use RebelCode\Atlas\Config;
 
 $atlas = Atlas::createDefault();
 
@@ -39,7 +38,7 @@ $logs = $atlas->table('logs');
 Note: _The `Atlas::table()` method creates table objects on-demand if they don't exist, and will return the same
 instance on
 subsequent calls. If you prefer explicit control over this behavior, you can use the `Atlas::getTable()` (which doesn't
-automatically create table instances) and the `Atlas::createTable()` (which will override existing tables with the
+automatically create table instances) and the `Atlas::addTable()` (which will override existing tables with the
 same name)._
 
 The large majority of Atlas' API is available from table objects:
