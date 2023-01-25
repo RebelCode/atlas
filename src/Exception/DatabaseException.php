@@ -8,7 +8,7 @@ use Throwable;
 
 class DatabaseException extends Exception
 {
-    /** @var DatabaseAdapter */
+    /** @var DatabaseAdapter|null */
     protected $adapter;
 
     /**
