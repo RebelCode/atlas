@@ -24,13 +24,6 @@
         <directory name="src"/>
     </projectFiles>
 
-    <extraFiles>
-        <ignoreFiles>
-            <directory name="vendor/phpspec/prophecy"/>
-        </ignoreFiles>
-    </extraFiles>
-
-
     <issueHandlers>
         <ConflictingReferenceConstraint errorLevel="error"/>
         <ContinueOutsideLoop errorLevel="error"/>
