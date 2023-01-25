@@ -1,6 +1,6 @@
 # Atlas
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rebelcode/atlas/Continuous%20Integration?style=flat-square)][github-ci]
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rebelcode/atlas/continuous-integration.yml?branch=main&style=flat-square)][github-ci]
 [![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/rebelcode/atlas?style=flat-square)][packagist]
 [![Packagist Version](https://img.shields.io/packagist/v/rebelcode/atlas?style=flat-square)][packagist]
 [![Packagist License](https://img.shields.io/packagist/l/rebelcode/atlas?style=flat-square)][packagist]
