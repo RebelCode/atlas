@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas;
 
+use LogicException;
 use Throwable;
 
 /** @psalm-immutable */
@@ -12,15 +13,21 @@ class Query
 
     /** @var array<string,mixed> */
     protected $data;
+    /** @var DatabaseAdapter|null */
+    private $adapter;
 
     /**
+     * Constructor.
+     *
      * @param QueryTypeInterface $type The query type.
      * @param array<string,mixed> $data An associative array of query data.
+     * @param DatabaseAdapter|null $adapter Optional database adapter instance.
      */
-    public function __construct(QueryTypeInterface $type, array $data)
+    public function __construct(QueryTypeInterface $type, array $data, ?DatabaseAdapter $adapter = null)
     {
         $this->type = $type;
         $this->data = $data;
+        $this->adapter = $adapter;
     }
 
     public function getType(): QueryTypeInterface
@@ -110,5 +117,18 @@ class Query
         } else {
             return $this->compile();
         }
+    }
+
+    /**
+     * @return DatabaseAdapter|never-returns
+     * @psalm-mutation-free
+     */
+    protected function getAdapter(): DatabaseAdapter
+    {
+        if ($this->adapter === null) {
+            throw new LogicException('Cannot execute query; please provide a database adapter.');
+        }
+
+        return $this->adapter;
     }
 }
