@@ -5,12 +5,10 @@ namespace RebelCode\Atlas;
 use LogicException;
 use Throwable;
 
-/** @psalm-immutable */
 class Query
 {
     /** @var QueryTypeInterface */
     protected $type;
-
     /** @var array<string,mixed> */
     protected $data;
     /** @var DatabaseAdapter|null */
@@ -30,12 +28,16 @@ class Query
         $this->adapter = $adapter;
     }
 
+    /** @psalm-mutation-free */
     public function getType(): QueryTypeInterface
     {
         return $this->type;
     }
 
-    /** @return static */
+    /**
+     * @return static
+     * @psalm-mutation-free
+     */
     public function withType(QueryTypeInterface $type): self
     {
         $clone = clone $this;
@@ -49,13 +51,17 @@ class Query
      * @param string $key The key of the query data to retrieve.
      * @param mixed $default Optional default value to return if no query data corresponds with the given key.
      * @return mixed
+     * @psalm-mutation-free
      */
     public function get(string $key, $default = null)
     {
         return $this->data[$key] ?? $default;
     }
 
-    /** @return array<string,mixed> */
+    /**
+     * @return array<string,mixed>
+     * @psalm-mutation-free
+     */
     public function getData(): array
     {
         return $this->data;
@@ -64,6 +70,7 @@ class Query
     /**
      * @param array<string,mixed> $data An associative array of query data.
      * @return static
+     * @psalm-mutation-free
      */
     public function withData(array $data): self
     {
@@ -75,6 +82,7 @@ class Query
     /**
      * @param array<string,mixed> $data An associative array of query data.
      * @return static
+     * @psalm-mutation-free
      */
     public function withAddedData(array $data): self
     {
@@ -86,6 +94,7 @@ class Query
     /**
      * @param list<string> $keys A list of data keys to omit.
      * @return static
+     * @psalm-mutation-free
      */
     public function withoutData(array $keys): self
     {
@@ -100,12 +109,17 @@ class Query
      * Compiles the query into a string.
      *
      * @return string
+     * @psalm-mutation-free
      */
     public function compile(): string
     {
         return $this->type->compile($this);
     }
 
+    /**
+     * @return string
+     * @psalm-mutation-free
+     */
     public function __toString(): string
     {
         if (version_compare(PHP_VERSION, '7.4.0', '<')) {
