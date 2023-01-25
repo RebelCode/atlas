@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
@@ -26,6 +27,25 @@ class TableTest extends TestCase
         $this->assertEquals($name, $table->getName());
         $this->assertSame($schema, $table->getSchema());
         $this->assertNull($table->getWhere());
+    }
+
+    public function testGetConfig()
+    {
+        $config = $this->createMock(Config::class);
+        $table = new Table($config, 'test');
+
+        $this->assertSame($config, $table->getConfig());
+    }
+
+    public function testGetDbAdapter()
+    {
+        $config = $this->createMock(Config::class);
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config->expects($this->once())->method('getDbAdapter')->willReturn($adapter);
+
+        $table = new Table($config, 'test');
+
+        $this->assertSame($adapter, $table->getDbAdapter());
     }
 
     public function testWhere()

@@ -61,6 +61,18 @@ class Table
         return $this->schema;
     }
 
+    /** Retrieves the Atlas configuration. */
+    public function getConfig(): Config
+    {
+        return $this->config;
+    }
+
+    /** Shortcut for `$table->getConfig()->getDbAdapter()` */
+    public function getDbAdapter(): ?DatabaseAdapter
+    {
+        return $this->config->getDbAdapter();
+    }
+
     /** Retrieves the table's WHERE condition. */
     public function getWhere(): ?ExprInterface
     {
