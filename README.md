@@ -541,5 +541,5 @@ package after [Atlas](https://en.wikipedia.org/wiki/Atlas_(mythology)), the Gree
 shoulders. Because well ... presumably, the world is pretty heavy, even for a god.
 
 
-[github-ci]: https://github.com/RebelCode/wp-http/actions/workflows/continuous-integration.yml
-[packagist]: https://packagist.org/packages/rebelcode/wp-http
+[github-ci]: https://github.com/RebelCode/atlas/actions/workflows/continuous-integration.yml
+[packagist]: https://packagist.org/packages/rebelcode/atlas
