@@ -2,6 +2,8 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Exception\DatabaseException;
+
 /**
  * An adapter for a database connection that allows queries created by Atlas to be executed.
  */
@@ -12,6 +14,7 @@ interface DatabaseAdapter
      *
      * @param string $sql The SQL for the query to execute.
      * @return array<string,mixed>[] A list of rows, where each row is a map of column names to values.
+     * @throws DatabaseException If an error occurred while executing the query.
      */
     public function queryResults(string $sql): array;
 
@@ -20,6 +23,7 @@ interface DatabaseAdapter
      *
      * @param string $sql The SQL for the query to execute.
      * @return int The number of affected rows.
+     * @throws DatabaseException If an error occurred while executing the query.
      */
     public function queryNumRows(string $sql): int;
 
@@ -28,6 +32,7 @@ interface DatabaseAdapter
      *
      * @param string $sql The SQL for the query to execute.
      * @return bool True if the query was successful, false otherwise.
+     * @throws DatabaseException If an error occurred while executing the query.
      */
     public function query(string $sql): bool;
 
