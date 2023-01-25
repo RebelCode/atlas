@@ -37,6 +37,13 @@ class Table
     /** @var Order[] */
     protected $order;
 
+    /**
+     * Constructor.
+     *
+     * @param Config $config The Atlas configuration.
+     * @param string $name The table name.
+     * @param Schema|null $schema Optional table schema.
+     */
     public function __construct(Config $config, string $name, ?Schema $schema = null)
     {
         $this->config = $config;
@@ -46,27 +53,41 @@ class Table
         $this->order = [];
     }
 
+    /** Retrieves the table's name. */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /** Retrieves the table's schema, if it has one. */
     public function getSchema(): ?Schema
     {
         return $this->schema;
     }
 
+    /** Retrieves the table's WHERE condition. */
     public function getWhere(): ?ExprInterface
     {
         return $this->where;
     }
 
-    /** @return Order[] */
+    /**
+     * Retrieves the table's ordering.
+     *
+     * @return Order[] A list of order instances.
+     */
     public function getOrder(): array
     {
         return $this->order;
     }
 
+    /**
+     * Begins building an expression with a table's column. Call methods on the returned object to continue building
+     * the expression.
+     *
+     * @param string $column The column name.
+     * @return Term The created term.
+     */
     public function column(string $column): Term
     {
         if ($this->schema !== null && !array_key_exists($column, $this->schema->getColumns())) {
@@ -76,6 +97,13 @@ class Table
         return new Term(Term::COLUMN, $column);
     }
 
+    /**
+     * Creates a copy of the table with a built-in WHERE condition that is used for all queries.
+     * If the table already has a WHERE condition, the new condition will be added using an AND operator.
+     *
+     * @param ExprInterface $expr The expression.
+     * @return Table The new table instance.
+     */
     public function where(ExprInterface $expr): Table
     {
         $clone = clone $this;
@@ -86,6 +114,13 @@ class Table
         return $clone;
     }
 
+    /**
+     * Creates a copy of the table with a built-in WHERE condition that is used for all queries.
+     * If the table already has a WHERE condition, the new condition will be added using an OR operator.
+     *
+     * @param ExprInterface $expr The expression.
+     * @return Table The new table instance.
+     */
     public function orWhere(ExprInterface $expr): Table
     {
         $clone = clone $this;
@@ -97,8 +132,11 @@ class Table
     }
 
     /**
-     * @param Order[]
-     * @return Table
+     * Creates a copy of the table with built-in ordering.
+     * If the table already has ordering in its state, the new ordering will be appended.
+     *
+     * @param Order[] $order A list of {@link Order} instances.
+     * @return Table The created table instance.
      */
     public function orderBy(array $order): Table
     {
@@ -111,7 +149,9 @@ class Table
     /**
      * Create a CREATE TABLE query.
      *
-     * @return Query[]
+     * @param bool $ifNotExists If true, the created query will be a "CREATE TABLE IF NOT EXISTS". Default is true.
+     * @param string|null $collate Optional collation name.
+     * @return Query[] The created queries: one to create the table and one to create the table indices, if any.
      */
     public function create(bool $ifNotExists = true, ?string $collate = null): array
     {
@@ -142,7 +182,13 @@ class Table
         }
     }
 
-    /** Create a DROP TABLE query. */
+    /**
+     * Create a DROP TABLE query for the table.
+     *
+     * @param bool $ifExists If true, the created query will be a "DROP TABLE IF EXISTS". Default is true.
+     * @param bool $cascade If true, the query will CASCADE.
+     * @return Query The created query.
+     */
     public function drop(bool $ifExists = true, bool $cascade = false): Query
     {
         if ($this->schema === null) {
@@ -159,7 +205,16 @@ class Table
         }
     }
 
-    /** Create a SELECT query. */
+    /**
+     * Creates a SELECT query for the table.
+     *
+     * @param string[]|null $columns Optional list of columns to select.
+     * @param ExprInterface|null $where Optional WHERE condition.
+     * @param Order[]|null $order Optional list of order instances.
+     * @param int|null $limit Optional LIMIT.
+     * @param int|null $offset Optional OFFSET.
+     * @return SelectQuery The created query.
+     */
     public function select(
         ?array $columns = null,
         ?ExprInterface $where = null,
@@ -178,10 +233,10 @@ class Table
     }
 
     /**
-     * Create an INSERT query.
+     * Create an INSERT query for the table.
      *
-     * @param array<string, mixed>[] $records
-     * @param array<string, mixed> $assignList
+     * @param array<string, mixed>[] $records A list of associative arrays, each representing a row to be inserted.
+     * @param array<string, mixed> $assignList Optional assignment list to use in the "ON DUPLICATE KEY" clause.
      */
     public function insert(array $records, array $assignList = []): InsertQuery
     {
@@ -197,6 +252,15 @@ class Table
         ]);
     }
 
+    /**
+     * Create an UPDATE query for the table.
+     *
+     * @param array $set An associative array with column names as keys and the update values as array values.
+     * @param ExprInterface|null $where Optional WHERE condition.
+     * @param Order[]|null $order Optional list of order instances.
+     * @param int|null $limit Optional LIMIT.
+     * @return UpdateQuery The created query.
+     */
     public function update(
         array $set,
         ?ExprInterface $where = null,
@@ -212,6 +276,14 @@ class Table
         ]);
     }
 
+    /**
+     * Creates a DELETE query for the table.
+     *
+     * @param ExprInterface|null $where Optional WHERE condition.
+     * @param Order[]|null $order Optional list of order instances.
+     * @param int|null $limit Optional LIMIT.
+     * @return DeleteQuery The created query.
+     */
     public function delete(
         ?ExprInterface $where = null,
         ?array $order = null,
@@ -225,7 +297,13 @@ class Table
         ]);
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * Creates a new query for the table.
+     *
+     * @param string $type The query type.
+     * @param array<string, mixed> $data The query data.
+     * @return Query The created query.
+     */
     public function query(string $type, array $data): Query
     {
         return new Query($this->getQueryType($type), array_merge($data, [
