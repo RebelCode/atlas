@@ -11,9 +11,9 @@ interface ExprInterface
 
     public function xor($term): BinaryExpr;
 
-    public function equals($term): BinaryExpr;
+    public function eq($term): BinaryExpr;
 
-    public function notEquals($term): BinaryExpr;
+    public function neq($term): BinaryExpr;
 
     public function gt($term): BinaryExpr;
 
@@ -35,13 +35,13 @@ interface ExprInterface
 
     public function notLike($term): BinaryExpr;
 
-    public function between($term1, $term2): BinaryExpr;
+    public function betw($term1, $term2): BinaryExpr;
 
-    public function notBetween($term1, $term2): BinaryExpr;
+    public function notBetw($term1, $term2): BinaryExpr;
 
-    public function regexp($term): BinaryExpr;
+    public function regx($term): BinaryExpr;
 
-    public function notRegexp($term): BinaryExpr;
+    public function notRegx($term): BinaryExpr;
 
     public function plus($term): BinaryExpr;
 
@@ -51,21 +51,21 @@ interface ExprInterface
 
     public function div($term): BinaryExpr;
 
-    public function intDiv($term): BinaryExpr;
+    public function iDiv($term): BinaryExpr;
 
     public function mod($term): BinaryExpr;
 
-    public function rightShift($term): BinaryExpr;
+    public function rShift($term): BinaryExpr;
 
-    public function leftShift($term): BinaryExpr;
+    public function lShift($term): BinaryExpr;
 
-    public function bitwiseAnd($term): BinaryExpr;
+    public function bAnd($term): BinaryExpr;
 
-    public function bitwiseOr($term): BinaryExpr;
+    public function bOr($term): BinaryExpr;
 
-    public function bitwiseXor($term): BinaryExpr;
+    public function bXor($term): BinaryExpr;
 
-    public function bitwiseNeg(): UnaryExpr;
+    public function bNeg(): UnaryExpr;
 
     public function not(): UnaryExpr;
 

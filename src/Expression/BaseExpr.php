@@ -22,12 +22,12 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::XOR, Term::create($term));
     }
 
-    public function equals($term): BinaryExpr
+    public function eq($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::EQ, Term::create($term));
     }
 
-    public function notEquals($term): BinaryExpr
+    public function neq($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::NEQ, Term::create($term));
     }
@@ -82,22 +82,22 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::NOT_LIKE, Term::create($term));
     }
 
-    public function between($term1, $term2): BinaryExpr
+    public function betw($term1, $term2): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::BETWEEN, Term::create([$term1, $term2]));
     }
 
-    public function notBetween($term1, $term2): BinaryExpr
+    public function notBetw($term1, $term2): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::NOT_BETWEEN, Term::create([$term1, $term2]));
     }
 
-    public function regexp($term): BinaryExpr
+    public function regx($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::REGEXP, Term::create($term));
     }
 
-    public function notRegexp($term): BinaryExpr
+    public function notRegx($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::NOT_REGEXP, Term::create($term));
     }
@@ -122,7 +122,7 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::DIV, Term::create($term));
     }
 
-    public function intDiv($term): BinaryExpr
+    public function iDiv($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::INT_DIV, Term::create($term));
     }
@@ -132,32 +132,32 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::MOD, Term::create($term));
     }
 
-    public function rightShift($term): BinaryExpr
+    public function rShift($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::R_SHIFT, Term::create($term));
     }
 
-    public function leftShift($term): BinaryExpr
+    public function lShift($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::L_SHIFT, Term::create($term));
     }
 
-    public function bitwiseAnd($term): BinaryExpr
+    public function bAnd($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::B_AND, Term::create($term));
     }
 
-    public function bitwiseOr($term): BinaryExpr
+    public function bOr($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::B_OR, Term::create($term));
     }
 
-    public function bitwiseXor($term): BinaryExpr
+    public function bXor($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::B_XOR, Term::create($term));
     }
 
-    public function bitwiseNeg(): UnaryExpr
+    public function bNeg(): UnaryExpr
     {
         return new UnaryExpr(UnaryExpr::B_NEG, $this);
     }

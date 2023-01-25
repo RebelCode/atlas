@@ -24,8 +24,8 @@ class BaseExprTest extends TestCase
             'and' => ['and', BinaryExpr::AND],
             'or' => ['or', BinaryExpr::OR],
             'xor' => ['xor', BinaryExpr::XOR],
-            'equals' => ['equals', BinaryExpr::EQ],
-            'notEquals' => ['notEquals', BinaryExpr::NEQ],
+            'eq' => ['eq', BinaryExpr::EQ],
+            'neq' => ['neq', BinaryExpr::NEQ],
             'gt' => ['gt', BinaryExpr::GT],
             'lt' => ['lt', BinaryExpr::LT],
             'gte' => ['gte', BinaryExpr::GTE],
@@ -36,19 +36,19 @@ class BaseExprTest extends TestCase
             'notIn' => ['notIn', BinaryExpr::NOT_IN],
             'like' => ['like', BinaryExpr::LIKE],
             'notLike' => ['notLike', BinaryExpr::NOT_LIKE],
-            'regexp' => ['regexp', BinaryExpr::REGEXP],
-            'notRegexp' => ['notRegexp', BinaryExpr::NOT_REGEXP],
+            'regx' => ['regx', BinaryExpr::REGEXP],
+            'notRegx' => ['notRegx', BinaryExpr::NOT_REGEXP],
             'plus' => ['plus', BinaryExpr::PLUS],
             'minus' => ['minus', BinaryExpr::MINUS],
             'mult' => ['mult', BinaryExpr::MULT],
             'div' => ['div', BinaryExpr::DIV],
-            'intDiv' => ['intDiv', BinaryExpr::INT_DIV],
+            'iDiv' => ['iDiv', BinaryExpr::INT_DIV],
             'mod' => ['mod', BinaryExpr::MOD],
-            'leftShift' => ['leftShift', BinaryExpr::L_SHIFT],
-            'rightShift' => ['rightShift', BinaryExpr::R_SHIFT],
-            'bitwiseAnd' => ['bitwiseAnd', BinaryExpr::B_AND],
-            'bitwiseOr' => ['bitwiseOr', BinaryExpr::B_OR],
-            'bitwiseXor' => ['bitwiseXor', BinaryExpr::B_XOR],
+            'lShift' => ['lShift', BinaryExpr::L_SHIFT],
+            'rShift' => ['rShift', BinaryExpr::R_SHIFT],
+            'bAnd' => ['bAnd', BinaryExpr::B_AND],
+            'bOr' => ['bOr', BinaryExpr::B_OR],
+            'bXor' => ['bXor', BinaryExpr::B_XOR],
         ];
     }
 
@@ -71,8 +71,8 @@ class BaseExprTest extends TestCase
     public function provideBetweenExprData(): array
     {
         return [
-            'between' => ['between', BinaryExpr::BETWEEN],
-            'not between' => ['notBetween', BinaryExpr::NOT_BETWEEN],
+            'between' => ['betw', BinaryExpr::BETWEEN],
+            'not between' => ['notBetw', BinaryExpr::NOT_BETWEEN],
         ];
     }
 
@@ -101,7 +101,7 @@ class BaseExprTest extends TestCase
         return [
             ['not', UnaryExpr::NOT],
             ['neg', UnaryExpr::NEG],
-            ['bitwiseNeg', UnaryExpr::B_NEG],
+            ['bNeg', UnaryExpr::B_NEG],
         ];
     }
 
