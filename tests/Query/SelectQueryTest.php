@@ -3,12 +3,15 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\SelectQuery;
+use RebelCode\Atlas\QueryType;
 use RebelCode\Atlas\QueryType\Select;
 
 class SelectQueryTest extends TestCase
@@ -40,5 +43,25 @@ class SelectQueryTest extends TestCase
 
         $this->assertEquals($value1, $subject1->get($key));
         $this->assertEquals($value2, $subject2->get($key));
+    }
+
+    public function testExec()
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config = Config::createDefault($adapter);
+
+        $query = new SelectQuery($config->getQueryType(QueryType::SELECT), [
+            Select::FROM => 'foo',
+        ], $adapter);
+
+        $expected = [
+            ['id' => 1, 'name' => 'Alice'],
+            ['id' => 2, 'name' => 'Bob'],
+            ['id' => 3, 'name' => 'Charlie']
+        ];
+
+        $adapter->expects($this->once())->method('queryResults')->willReturn($expected);
+
+        $this->assertEquals($expected, $query->exec());
     }
 }

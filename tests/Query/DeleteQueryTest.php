@@ -2,11 +2,14 @@
 
 namespace RebelCode\Atlas\Test\Query;
 
+use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\DeleteQuery;
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\QueryType;
 use RebelCode\Atlas\QueryType\Delete;
 
 class DeleteQueryTest extends TestCase
@@ -34,5 +37,20 @@ class DeleteQueryTest extends TestCase
 
         $this->assertEquals($value1, $subject1->get($key));
         $this->assertEquals($value2, $subject2->get($key));
+    }
+
+    public function testExec()
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config = Config::createDefault($adapter);
+
+        $query = new DeleteQuery($config->getQueryType(QueryType::DELETE), [
+            Delete::FROM => 'foo',
+        ], $adapter);
+
+        $numRows = 123;
+        $adapter->expects($this->once())->method('queryNumRows')->willReturn($numRows);
+
+        $this->assertEquals($numRows, $query->exec());
     }
 }

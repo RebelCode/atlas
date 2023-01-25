@@ -2,9 +2,12 @@
 
 namespace RebelCode\Atlas\Test\Query;
 
+use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\InsertQuery;
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\QueryType;
 use RebelCode\Atlas\QueryType\Insert;
 
 class InsertQueryTest extends TestCase
@@ -32,5 +35,31 @@ class InsertQueryTest extends TestCase
 
         $this->assertEquals($value1, $subject1->get($key));
         $this->assertEquals($value2, $subject2->get($key));
+    }
+
+    public function provideExecNumRowsAffected()
+    {
+        return [
+            '0' => [0, null],
+            '1' => [1, 123],
+        ];
+    }
+
+    /** @dataProvider provideExecNumRowsAffected */
+    public function testExec(int $numRows, ?int $insertId)
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config = Config::createDefault($adapter);
+
+        $query = new InsertQuery($config->getQueryType(QueryType::INSERT), [
+            Insert::TABLE => 'foo',
+            Insert::COLUMNS => ['name', 'age'],
+            Insert::VALUES => [['Alice', 20], ['Bob', 30]],
+        ], $adapter);
+
+        $adapter->expects($this->once())->method('queryNumRows')->willReturn($numRows);
+        $adapter->method('getInsertId')->willReturn($insertId);
+
+        $this->assertEquals($insertId, $query->exec());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Query;
 
+use RebelCode\Atlas\Exception\DatabaseException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryType\Update;
@@ -36,5 +37,16 @@ class UpdateQuery extends Query
     public function limit(?int $limit): self
     {
         return $this->withAddedData([Update::LIMIT => $limit]);
+    }
+
+    /**
+     * Executes the UPDATE query.
+     *
+     * @return int The number of rows affected by the query.
+     * @throws DatabaseException If an error occurred while executing the query.
+     */
+    public function exec(): int
+    {
+        return $this->getAdapter()->queryNumRows($this->compile());
     }
 }

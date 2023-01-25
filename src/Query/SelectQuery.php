@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Query;
 
+use RebelCode\Atlas\Exception\DatabaseException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
@@ -65,5 +66,16 @@ class SelectQuery extends Query
     public function offset(?int $offset): self
     {
         return $this->withAddedData([Select::OFFSET => $offset]);
+    }
+
+    /**
+     * Executes the SELECT query.
+     *
+     * @return array<string,mixed>[] A list of rows, where each row is a map of column names to values.
+     * @throws DatabaseException If an error occurred while executing the query.
+     */
+    public function exec(): array
+    {
+        return $this->getAdapter()->queryResults($this->compile());
     }
 }
