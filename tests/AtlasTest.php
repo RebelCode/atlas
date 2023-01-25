@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Test;
 use RebelCode\Atlas\Atlas;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Table;
 
@@ -25,6 +26,14 @@ class AtlasTest extends TestCase
 
         $this->assertEquals(Config::createDefault(), $atlas->getConfig());
         $this->assertCount(0, $atlas->getTables());
+    }
+
+    public function testDefaultWithAdapter()
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $atlas = Atlas::createDefault($adapter);
+
+        $this->assertSame($adapter, $atlas->getConfig()->getDbAdapter());
     }
 
     public function testTable()

@@ -13,13 +13,26 @@ use RebelCode\Atlas\QueryType\Update;
 /** @psalm-immutable */
 class Config
 {
+    /** @var DatabaseAdapter|null */
+    protected $adapter;
     /** @var array<string, QueryTypeInterface> */
     protected $queryTypes;
 
-    /** @param array<string, QueryTypeInterface> $types */
-    public function __construct(array $types)
+    /**
+     * Constructor.
+     *
+     * @param DatabaseAdapter|null $adapter Optional database adapter.
+     * @param array<string, QueryTypeInterface> $types The query types.
+     */
+    public function __construct(?DatabaseAdapter $adapter = null, array $types = [])
     {
+        $this->adapter = $adapter;
         $this->queryTypes = $types;
+    }
+
+    public function getDbAdapter(): ?DatabaseAdapter
+    {
+        return $this->adapter;
     }
 
     /** @return array<string, QueryTypeInterface> */
@@ -37,12 +50,12 @@ class Config
     /** @param array<string, QueryTypeInterface> $overrides */
     public function withOverrides(array $overrides): self
     {
-        return new self(array_merge($this->queryTypes, $overrides));
+        return new self($this->adapter, array_merge($this->queryTypes, $overrides));
     }
 
-    public static function createDefault(): self
+    public static function createDefault(?DatabaseAdapter $adapter = null): self
     {
-        return new self([
+        return new self($adapter, [
             QueryType::CREATE_TABLE => new CreateTable(),
             QueryType::CREATE_INDEX => new CreateIndex(),
             QueryType::DROP_TABLE => new DropTable(),

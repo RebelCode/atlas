@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Config;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\QueryType;
 use RebelCode\Atlas\QueryType\CreateIndex;
 use RebelCode\Atlas\QueryType\CreateTable;
@@ -18,11 +19,13 @@ class ConfigTest extends TestCase
 {
     public function testConstructor()
     {
-        $config = new Config($queryTypes = [
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config = new Config($adapter, $queryTypes = [
             'foo' => $this->createMock(QueryTypeInterface::class),
             'bar' => $this->createMock(QueryTypeInterface::class),
         ]);
 
+        $this->assertSame($adapter, $config->getDbAdapter());
         $this->assertSame($queryTypes, $config->getQueryTypes());
     }
 
@@ -30,6 +33,7 @@ class ConfigTest extends TestCase
     {
         $config = Config::createDefault();
 
+        $this->assertNull($config->getDbAdapter());
         $this->assertInstanceOf(CreateTable::class, $config->getQueryType(QueryType::CREATE_TABLE));
         $this->assertInstanceOf(CreateIndex::class, $config->getQueryType(QueryType::CREATE_INDEX));
         $this->assertInstanceOf(DropTable::class, $config->getQueryType(QueryType::DROP_TABLE));
@@ -39,9 +43,17 @@ class ConfigTest extends TestCase
         $this->assertInstanceOf(Delete::class, $config->getQueryType(QueryType::DELETE));
     }
 
+    public function testCreateDefaultWithAdapter()
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $config = Config::createDefault($adapter);
+
+        $this->assertSame($adapter, $config->getDbAdapter());
+    }
+
     public function testGetQueryTypeExists()
     {
-        $config = new Config([
+        $config = new Config(null, [
             'foo' => $foo = $this->createMock(QueryTypeInterface::class),
             'bar' => $bar = $this->createMock(QueryTypeInterface::class),
             'baz' => $baz = $this->createMock(QueryTypeInterface::class),
@@ -54,7 +66,7 @@ class ConfigTest extends TestCase
 
     public function testGetQueryTypeNotExists()
     {
-        $config = new Config([
+        $config = new Config(null, [
             'foo' => $this->createMock(QueryTypeInterface::class),
             'bar' => $this->createMock(QueryTypeInterface::class),
             'baz' => $this->createMock(QueryTypeInterface::class),
@@ -65,7 +77,7 @@ class ConfigTest extends TestCase
 
     public function testWithOverrides()
     {
-        $config = new Config([
+        $config = new Config(null, [
             'foo' => $foo = $this->createMock(QueryTypeInterface::class),
             'bar' => $this->createMock(QueryTypeInterface::class),
             'baz' => $baz = $this->createMock(QueryTypeInterface::class),
