@@ -3,6 +3,7 @@
 namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\QueryTypeInterface;
 use stdClass;
@@ -24,6 +25,16 @@ class QueryTest extends TestCase
         ]);
 
         $this->assertSame($data, $query->getData());
+    }
+
+    public function testConstructorAdapter()
+    {
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $query = new Query($this->createMock(QueryTypeInterface::class), $data = [], $adapter);
+
+        $ref = new \ReflectionProperty(Query::class, 'adapter');
+        $ref->setAccessible(true);
+        $this->assertSame($adapter, $ref->getValue($query));
     }
 
     public function testGet()
