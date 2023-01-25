@@ -3,52 +3,78 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Config;
-use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
+use RebelCode\Atlas\DatabaseAdapter;
+use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query\UpdateQuery;
-use RebelCode\Atlas\QueryType;
-use RebelCode\Atlas\QueryType\Update;
+use RebelCode\Atlas\Test\Helpers;
 
 class UpdateQueryTest extends TestCase
 {
     public function testIsQuery()
     {
-        $this->assertInstanceOf(Query::class, new UpdateQuery(new Update(), []));
+        $this->assertInstanceOf(Query::class, new UpdateQuery());
     }
 
-    public function provideMethodsData(): array
+    public function testCtor()
     {
-        return [
-            'table' => [Update::TABLE, 'table', 'foo', 'bar'],
-            'set' => [Update::SET, 'set', ['foo' => 1], ['bar' => 2]],
-            'where' => [Update::WHERE, 'where', Term::create('foo'), Term::create('bar')],
-            'order' => [Update::ORDER, 'orderBy', [Order::by('foo')], [Order::by('bar')]],
-            'limit' => [Update::LIMIT, 'limit', 5, 9],
-        ];
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $table = 'foo';
+        $set = ['name' => 'Alice'];
+        $where = $this->createMock(ExprInterface::class);
+        $order = [Order::by('foo')];
+        $limit = 123;
+
+        $query = new UpdateQuery($adapter, $table, $set, $where, $order, $limit);
+
+        $this->assertSame($table, Helpers::property($query, 'table'));
+        $this->assertSame($set, Helpers::property($query, 'set'));
+        $this->assertSame($where, Helpers::property($query, 'where'));
+        $this->assertSame($order, Helpers::property($query, 'order'));
+        $this->assertSame($limit, Helpers::property($query, 'limit'));
     }
 
-    /** @dataProvider provideMethodsData */
-    public function testMethods($key, $method, $value1, $value2)
+    public function testTable()
     {
-        $subject1 = new UpdateQuery(new Update(), [$key => $value1]);
-        $subject2 = $subject1->$method($value2);
+        $query = new UpdateQuery();
+        $new = $query->table($table = 'foo');
 
-        $this->assertEquals($value1, $subject1->get($key));
-        $this->assertEquals($value2, $subject2->get($key));
+        $this->assertNotSame($query, $new);
+        $this->assertSame($table, Helpers::property($new, 'table'));
+    }
+
+    public function testSet()
+    {
+        $query = new UpdateQuery();
+        $new = $query->set($set = ['name' => 'Alice']);
+
+        $this->assertNotSame($query, $new);
+        $this->assertSame($set, Helpers::property($new, 'set'));
+    }
+
+    public function testWhere()
+    {
+        $query = new UpdateQuery();
+        $new = $query->where($where = $this->createMock(ExprInterface::class));
+
+        $this->assertNotSame($query, $new);
+        $this->assertSame($where, Helpers::property($new, 'where'));
+    }
+
+    public function testOrder()
+    {
+        $query = new UpdateQuery();
+        $new = $query->orderBy($order = [Order::by('foo')]);
+
+        $this->assertNotSame($query, $new);
+        $this->assertSame($order, Helpers::property($new, 'order'));
     }
 
     public function testExec()
     {
         $adapter = $this->createMock(DatabaseAdapter::class);
-        $config = Config::createDefault($adapter);
-
-        $query = new UpdateQuery($config->getQueryType(QueryType::UPDATE), [
-            Update::TABLE => 'foo',
-            Update::SET => ['name' => 'Alice'],
-        ], $adapter);
+        $query = new UpdateQuery($adapter, 'foo', ['name' => 'Alice']);
 
         $numRows = 123;
         $adapter->expects($this->once())->method('queryNumRows')->willReturn($numRows);

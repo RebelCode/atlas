@@ -1,59 +1,78 @@
 <?php
 
-namespace RebelCode\Atlas\QueryType;
+namespace RebelCode\Atlas\Query;
 
-use InvalidArgumentException;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use DomainException;
 use RebelCode\Atlas\Query;
-use RebelCode\Atlas\QueryTypeInterface;
-use RebelCode\Atlas\QueryUtils;
+use RebelCode\Atlas\DatabaseAdapter;
+use RebelCode\Atlas\Exception\QueryCompileException;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Schema\ForeignKey;
 use Throwable;
 use UnexpectedValueException;
 
-/** @psalm-immutable */
-class CreateTable implements QueryTypeInterface
+class CreateTableQuery extends Query
 {
     /** @var string */
-    public const IF_NOT_EXISTS = 'if_not_exists';
-    /** @var string */
-    public const NAME = 'name';
-    /** @var string */
-    public const SCHEMA = 'schema';
-    /** @var string */
-    public const COLLATE = 'collate';
+    protected $name;
+    /** @var bool */
+    protected $ifNotExists;
+    /** @var Schema */
+    protected $schema;
+    /** @var string|null */
+    protected $collate;
 
-    /** @inheritDoc */
-    public function compile(Query $query): string
+    /**
+     * Constructor.
+     *
+     * @param DatabaseAdapter|null $adapter The database adapter to execute the query.
+     * @param string $name The name of the table to create.
+     * @param bool $ifNotExists Whether to add the "IF NOT EXISTS" clause.
+     * @param Schema $schema The table schema.
+     * @param string|null $collate The collation to use for the table.
+     */
+    public function __construct(
+        ?DatabaseAdapter $adapter,
+        string $name,
+        bool $ifNotExists,
+        Schema $schema,
+        ?string $collate = null
+    ) {
+        parent::__construct($adapter);
+        $this->ifNotExists = $ifNotExists;
+        $this->name = $name;
+        $this->schema = $schema;
+        $this->collate = $collate;
+    }
+
+    /**
+     * @inheritDoc
+     * @psalm-mutation-free
+     */
+    public function compile(): string
     {
         try {
-            $tableName = QueryUtils::getTableName(self::NAME, $query);
-            $schema = $query->get(self::SCHEMA);
-
-            if (!$schema instanceof Schema) {
-                throw new InvalidArgumentException('Table schema is not valid');
+            $name = trim($this->name);
+            if (empty($name)) {
+                throw new DomainException('Table name is missing');
             }
 
-            $ifNotExists = $query->get(self::IF_NOT_EXISTS);
-            $command = 'CREATE TABLE' . ($ifNotExists ? ' IF NOT EXISTS' : '');
-            $schemaStr = $this->compileSchema($schema);
+            $command = 'CREATE TABLE' . ($this->ifNotExists ? ' IF NOT EXISTS' : '');
+            $schemaStr = $this->compileSchema($this->schema);
 
             if (empty($schemaStr)) {
                 throw new UnexpectedValueException('A table schema is required');
             }
 
-            $result = "$command `$tableName` (\n  $schemaStr\n)";
+            $result = "$command `$name` (\n  $schemaStr\n)";
 
-            /** @var string|null $collate */
-            $collate = $query->get(self::COLLATE);
-            if ($collate !== null) {
-                $result .= ' COLLATE ' . $collate;
+            if ($this->collate !== null) {
+                $result .= ' COLLATE ' . $this->collate;
             }
 
             return $result;
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile CREATE TABLE query - ' . $e->getMessage(), $query, $e);
+            throw new QueryCompileException('Cannot compile CREATE TABLE query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -118,5 +137,15 @@ class CreateTable implements QueryTypeInterface
         }
 
         return implode(",\n  ", $lines);
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return bool True if the query was executed successfully, false otherwise.
+     */
+    public function exec(): bool
+    {
+        return $this->getAdapter()->query($this->compile());
     }
 }

@@ -2,21 +2,27 @@
 
 namespace RebelCode\Atlas\Test;
 
-use RebelCode\Atlas\Atlas;
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Config;
+use RebelCode\Atlas\Atlas;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Schema;
-use RebelCode\Atlas\Table;
 
 class AtlasTest extends TestCase
 {
     public function testConstructor()
     {
-        $config = $this->createMock(Config::class);
-        $atlas = new Atlas($config);
+        $atlas = new Atlas();
 
-        $this->assertSame($config, $atlas->getConfig());
+        $this->assertNull($atlas->getDbAdapter());
+        $this->assertCount(0, $atlas->getTables());
+    }
+
+    public function testConstructorWithAdapter()
+    {
+        $adabter = $this->createMock(DatabaseAdapter::class);
+        $atlas = new Atlas($adabter);
+
+        $this->assertSame($adabter, $atlas->getDbAdapter());
         $this->assertCount(0, $atlas->getTables());
     }
 
@@ -24,7 +30,7 @@ class AtlasTest extends TestCase
     {
         $atlas = Atlas::createDefault();
 
-        $this->assertEquals(Config::createDefault(), $atlas->getConfig());
+        $this->assertNull($atlas->getDbAdapter());
         $this->assertCount(0, $atlas->getTables());
     }
 
@@ -33,36 +39,25 @@ class AtlasTest extends TestCase
         $adapter = $this->createMock(DatabaseAdapter::class);
         $atlas = Atlas::createDefault($adapter);
 
-        $this->assertSame($adapter, $atlas->getConfig()->getDbAdapter());
+        $this->assertSame($adapter, $atlas->getDbAdapter());
     }
 
     public function testTable()
     {
-        $config = $this->createMock(Config::class);
-        $atlas = new Atlas($config);
-
-        $table = $atlas->table('test');
-
-        $this->assertEquals('test', $table->getName());
-        $this->assertNull($table->getSchema());
-    }
-
-    public function testTableWithSchema()
-    {
-        $config = $this->createMock(Config::class);
-        $atlas = new Atlas($config);
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $atlas = new Atlas($adapter);
 
         $schema = $this->createMock(Schema::class);
         $table = $atlas->table('test', $schema);
 
         $this->assertEquals('test', $table->getName());
         $this->assertSame($schema, $table->getSchema());
+        $this->assertSame($adapter, $table->getDbAdapter());
     }
 
     public function testTableCache()
     {
-        $config = $this->createMock(Config::class);
-        $atlas = new Atlas($config);
+        $atlas = new Atlas();
 
         $table1 = $atlas->table('test');
         $table2 = $atlas->table('test');
@@ -72,8 +67,7 @@ class AtlasTest extends TestCase
 
     public function testTableCacheWithSchema()
     {
-        $config = $this->createMock(Config::class);
-        $atlas = new Atlas($config);
+        $atlas = new Atlas();
 
         $schema = $this->createMock(Schema::class);
         $table1 = $atlas->table('test');

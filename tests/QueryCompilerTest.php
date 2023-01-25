@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
+use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\QueryCompiler;
 use stdClass;
 
@@ -39,7 +40,7 @@ class QueryCompilerTest extends TestCase
 
     public function testCompileFromSubQuery()
     {
-        $sub = $this->createMock(Query::class);
+        $sub = $this->createMock(SelectQuery::class);
         $sub->expects($this->once())->method('compile')->willReturn('foobar');
 
         $result = QueryCompiler::compileFrom($sub, null, true);
@@ -49,7 +50,7 @@ class QueryCompilerTest extends TestCase
 
     public function testCompileFromExprAlias()
     {
-        $sub = $this->createMock(Query::class);
+        $sub = $this->createMock(SelectQuery::class);
         $sub->expects($this->once())->method('compile')->willReturn('foobar');
 
         $result = QueryCompiler::compileFrom($sub, 'sub', true);

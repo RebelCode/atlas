@@ -3,31 +3,26 @@
 namespace RebelCode\Atlas;
 
 use DomainException;
-use RebelCode\Atlas\Exception\MissingQueryTypeException;
 use RebelCode\Atlas\Exception\NoTableSchemaException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Query\CreateIndexQuery;
+use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Query\DeleteQuery;
+use RebelCode\Atlas\Query\DropTableQuery;
 use RebelCode\Atlas\Query\InsertQuery;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Query\UpdateQuery;
-use RebelCode\Atlas\QueryType\CreateIndex;
-use RebelCode\Atlas\QueryType\CreateTable;
-use RebelCode\Atlas\QueryType\Delete;
-use RebelCode\Atlas\QueryType\DropTable;
-use RebelCode\Atlas\QueryType\Insert;
-use RebelCode\Atlas\QueryType\Select;
-use RebelCode\Atlas\QueryType\Update;
 
 /** @psalm-immutable */
 class Table
 {
-    /** @var Config */
-    protected $config;
     /** @var string */
     protected $name;
     /** @var Schema|null */
     protected $schema;
+    /** @var DatabaseAdapter|null */
+    protected $adapter;
     /** @var ExprInterface|null */
     protected $where;
     /** @var Order[] */
@@ -36,15 +31,15 @@ class Table
     /**
      * Constructor.
      *
-     * @param Config $config The Atlas configuration.
      * @param string $name The table name.
      * @param Schema|null $schema Optional table schema.
+     * @param DatabaseAdapter|null $adapter Optional database adapter to be able to execute queries.
      */
-    public function __construct(Config $config, string $name, ?Schema $schema = null)
+    public function __construct(string $name, ?Schema $schema = null, ?DatabaseAdapter $adapter = null)
     {
-        $this->config = $config;
         $this->name = $name;
         $this->schema = $schema;
+        $this->adapter = $adapter;
         $this->where = null;
         $this->order = [];
     }
@@ -61,16 +56,14 @@ class Table
         return $this->schema;
     }
 
-    /** Retrieves the Atlas configuration. */
-    public function getConfig(): Config
-    {
-        return $this->config;
-    }
-
-    /** Shortcut for `$table->getConfig()->getDbAdapter()` */
+    /**
+     * Retrieves the database adapter that is used to execute queries.
+     *
+     * @return DatabaseAdapter|null The database adapter instance, or null if no adapter is set.
+     */
     public function getDbAdapter(): ?DatabaseAdapter
     {
-        return $this->config->getDbAdapter();
+        return $this->adapter;
     }
 
     /** Retrieves the table's WHERE condition. */
@@ -159,7 +152,7 @@ class Table
      *
      * @param bool $ifNotExists If true, the created query will be a "CREATE TABLE IF NOT EXISTS". Default is true.
      * @param string|null $collate Optional collation name.
-     * @return Query[] The created queries: one to create the table and one to create the table indices, if any.
+     * @return Query[] The created queries: at least one to create the table, more to create the table's indices.
      */
     public function create(bool $ifNotExists = true, ?string $collate = null): array
     {
@@ -170,20 +163,11 @@ class Table
             );
         } else {
             $queries = [
-                new Query($this->getQueryType(QueryType::CREATE_TABLE), [
-                    CreateTable::NAME => $this->name,
-                    CreateTable::SCHEMA => $this->schema,
-                    CreateTable::IF_NOT_EXISTS => $ifNotExists,
-                    CreateTable::COLLATE => $collate,
-                ]),
+                new CreateTableQuery($this->adapter, $this->name, $ifNotExists, $this->schema, $collate),
             ];
 
             foreach ($this->schema->getIndexes() as $name => $index) {
-                $queries[] = new Query($this->getQueryType(QueryType::CREATE_INDEX), [
-                    CreateIndex::TABLE => $this->name,
-                    CreateIndex::NAME => $name,
-                    CreateIndex::INDEX => $index,
-                ]);
+                $queries[] = new CreateIndexQuery($this->adapter, $this->name, $name, $index);
             }
 
             return $queries;
@@ -195,9 +179,9 @@ class Table
      *
      * @param bool $ifExists If true, the created query will be a "DROP TABLE IF EXISTS". Default is true.
      * @param bool $cascade If true, the query will CASCADE.
-     * @return Query The created query.
+     * @return DropTableQuery The created query.
      */
-    public function drop(bool $ifExists = true, bool $cascade = false): Query
+    public function drop(bool $ifExists = true, bool $cascade = false): DropTableQuery
     {
         if ($this->schema === null) {
             throw new NoTableSchemaException(
@@ -205,39 +189,46 @@ class Table
                 $this
             );
         } else {
-            return new Query($this->getQueryType(QueryType::DROP_TABLE), [
-                DropTable::TABLE => $this->name,
-                DropTable::IF_EXISTS => $ifExists,
-                DropTable::CASCADE => $cascade,
-            ]);
+            return new DropTableQuery(
+                $this->adapter,
+                $this->name,
+                $ifExists,
+                $cascade
+            );
         }
     }
 
     /**
      * Creates a SELECT query for the table.
      *
-     * @param string[]|null $columns Optional list of columns to select.
-     * @param ExprInterface|null $where Optional WHERE condition.
-     * @param Order[]|null $order Optional list of order instances.
-     * @param int|null $limit Optional LIMIT.
-     * @param int|null $offset Optional OFFSET.
-     * @return SelectQuery The created query.
+     * @param array<Term|string> $columns The columns to select.
+     * @param ExprInterface|null $where The WHERE condition.
+     * @param Group[] $group The GROUP BY clause.
+     * @param ExprInterface|null $having The HAVING condition.
+     * @param Order[] $order The ORDER BY clause.
+     * @param int|null $limit The LIMIT clause.
+     * @param int|null $offset The OFFSET clause.
      */
     public function select(
-        ?array $columns = null,
+        array $columns = [],
         ?ExprInterface $where = null,
-        ?array $order = null,
+        array $group = [],
+        ?ExprInterface $having = null,
+        array $order = [],
         ?int $limit = null,
         ?int $offset = null
     ): SelectQuery {
-        return new SelectQuery($this->getQueryType(QueryType::SELECT), [
-            Select::FROM => $this->name,
-            Select::COLUMNS => empty($columns) ? ['*'] : $columns,
-            Select::WHERE => $this->useWhereState($where),
-            Select::ORDER => $this->useOrderState($order),
-            Select::LIMIT => $limit,
-            Select::OFFSET => $offset,
-        ]);
+        return new SelectQuery(
+            $this->adapter,
+            $this->name,
+            $columns,
+            $this->useWhereState($where),
+            $group,
+            $having,
+            $this->useOrderState($order),
+            $limit,
+            $offset
+        );
     }
 
     /**
@@ -252,12 +243,7 @@ class Table
             throw new DomainException('List of values to insert is empty');
         }
 
-        return new InsertQuery($this->getQueryType(QueryType::INSERT), [
-            Insert::TABLE => $this->name,
-            Insert::COLUMNS => array_keys($records[0]),
-            Insert::VALUES => $records,
-            Insert::ON_DUPLICATE_KEY => $assignList,
-        ]);
+        return new InsertQuery($this->adapter, $this->name, array_keys($records[0]), $records, $assignList);
     }
 
     /**
@@ -272,16 +258,17 @@ class Table
     public function update(
         array $set,
         ?ExprInterface $where = null,
-        ?array $order = null,
+        array $order = [],
         ?int $limit = null
     ): UpdateQuery {
-        return new UpdateQuery($this->getQueryType(QueryType::UPDATE), [
-            Update::TABLE => $this->name,
-            Update::SET => $set,
-            Update::WHERE => $this->useWhereState($where),
-            Update::ORDER => $this->useOrderState($order),
-            Update::LIMIT => $limit,
-        ]);
+        return new UpdateQuery(
+            $this->adapter,
+            $this->name,
+            $set,
+            $this->useWhereState($where),
+            $this->useOrderState($order),
+            $limit
+        );
     }
 
     /**
@@ -297,41 +284,13 @@ class Table
         ?array $order = null,
         ?int $limit = null
     ): DeleteQuery {
-        return new DeleteQuery($this->getQueryType(QueryType::DELETE), [
-            Delete::FROM => $this->name,
-            Delete::WHERE => $this->useWhereState($where),
-            Delete::ORDER => $this->useOrderState($order),
-            Delete::LIMIT => $limit,
-        ]);
-    }
-
-    /**
-     * Creates a new query for the table.
-     *
-     * @param string $type The query type.
-     * @param array<string, mixed> $data The query data.
-     * @return Query The created query.
-     */
-    public function query(string $type, array $data): Query
-    {
-        return new Query(
-            $this->getQueryType($type),
-            array_merge($data, ['table' => $this->name])
+        return new DeleteQuery(
+            $this->adapter,
+            $this->name,
+            $this->useWhereState($where),
+            $this->useOrderState($order),
+            $limit
         );
-    }
-
-    /**
-     * Utility method for retrieving a query type from the config, throwing an exception if it's not found.
-     */
-    protected function getQueryType(string $typeKey): QueryTypeInterface
-    {
-        $type = $this->config->getQueryType($typeKey);
-
-        if ($type === null) {
-            throw new MissingQueryTypeException("Query type \"$typeKey\" is missing in config", $typeKey);
-        }
-
-        return $type;
     }
 
     protected function useWhereState(?ExprInterface $where): ?ExprInterface
@@ -345,7 +304,7 @@ class Table
         }
     }
 
-    protected function useOrderState(?array $order): ?array
+    protected function useOrderState(array $order): array
     {
         if (empty($this->order)) {
             return $order;

@@ -4,31 +4,34 @@ namespace RebelCode\Atlas;
 
 class Atlas
 {
-    /** @var Config */
-    protected $config;
-
+    /** @var DatabaseAdapter|null */
+    protected $adapter;
     /** @var array<string,Table> */
     protected $tables;
 
-    /** @param Config $config */
-    public function __construct(Config $config)
+    /**
+     * Constructor.
+     *
+     * @param DatabaseAdapter|null $adapter Optional database adapter to be able to execute queries.
+     */
+    public function __construct(?DatabaseAdapter $adapter = null)
     {
-        $this->config = $config;
+        $this->adapter = $adapter;
         $this->tables = [];
     }
 
     public function table(string $name, ?Schema $schema = null): Table
     {
         if (!array_key_exists($name, $this->tables) || $schema !== null) {
-            $this->tables[$name] = new Table($this->config, $name, $schema);
+            $this->tables[$name] = new Table($name, $schema, $this->adapter);
         }
 
         return $this->tables[$name];
     }
 
-    public function getConfig(): Config
+    public function getDbAdapter(): ?DatabaseAdapter
     {
-        return $this->config;
+        return $this->adapter;
     }
 
     /** @return Table[] */
@@ -39,6 +42,6 @@ class Atlas
 
     public static function createDefault(?DatabaseAdapter $adapter = null): self
     {
-        return new self(Config::createDefault($adapter));
+        return new self($adapter);
     }
 }

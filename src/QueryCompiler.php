@@ -6,13 +6,10 @@ use DomainException;
 use InvalidArgumentException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Query\SelectQuery;
 
 /**
  * Compiles fragments of SQL queries.
- *
- * The methods largely accept `mixed` arguments. This is to allow consumer code to pass data retrieved from
- * {@link Query::get()} without needing to perform validation. The methods in this class will perform the validation
- * themselves.
  */
 class QueryCompiler
 {
@@ -21,15 +18,15 @@ class QueryCompiler
      *
      * @psalm-mutation-free
      *
-     * @param mixed $source The source. Either a table name, or a {@link Query} instance if the $subQueries argument
-     *                      is true.
+     * @param mixed $source The source. Either a table name, or a {@link SelectQuery} instance if the $subQueries
+     *                      argument is true.
      * @param mixed $alias Optional alias string.
-     * @param bool $subQueries If true, {@link Query} instances as the first argument are accepted.
+     * @param bool $subQueries If true, {@link SelectQuery} instances as the first argument are accepted.
      * @return string
      */
     public static function compileFrom($source, $alias = null, bool $subQueries = false): string
     {
-        $isSubQuery = ($subQueries && $source instanceof Query);
+        $isSubQuery = ($subQueries && $source instanceof SelectQuery);
         $sourceStr = $isSubQuery ? $source->compile() : $source;
 
         if (is_string($sourceStr)) {
@@ -120,7 +117,7 @@ class QueryCompiler
      */
     public static function compileOffset($offset): string
     {
-        if (is_numeric($offset)) {
+        if (is_numeric($offset) && $offset > 0) {
             return 'OFFSET ' . (string) intval($offset);
         } else {
             return '';

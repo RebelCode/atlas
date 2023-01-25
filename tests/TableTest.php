@@ -3,17 +3,14 @@
 namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Config;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
-use RebelCode\Atlas\QueryType;
-use RebelCode\Atlas\QueryType\CreateIndex;
-use RebelCode\Atlas\QueryType\CreateTable;
-use RebelCode\Atlas\QueryType\DropTable;
-use RebelCode\Atlas\QueryTypeInterface;
+use RebelCode\Atlas\Query\CreateIndexQuery;
+use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Table;
 
@@ -21,37 +18,21 @@ class TableTest extends TestCase
 {
     public function testConstructor()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, $name = 'test', $schema = $this->createMock(Schema::class));
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $schema = $this->createMock(Schema::class);
+
+        $table = new Table($name = 'test', $schema, $adapter);
 
         $this->assertEquals($name, $table->getName());
         $this->assertSame($schema, $table->getSchema());
-        $this->assertNull($table->getWhere());
-    }
-
-    public function testGetConfig()
-    {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test');
-
-        $this->assertSame($config, $table->getConfig());
-    }
-
-    public function testGetDbAdapter()
-    {
-        $config = $this->createMock(Config::class);
-        $adapter = $this->createMock(DatabaseAdapter::class);
-        $config->expects($this->once())->method('getDbAdapter')->willReturn($adapter);
-
-        $table = new Table($config, 'test');
-
         $this->assertSame($adapter, $table->getDbAdapter());
+        $this->assertNull($table->getWhere());
+        $this->assertEquals([], $table->getOrder());
     }
 
     public function testWhere()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test', $this->createMock(Schema::class));
+        $table = new Table('test', $this->createMock(Schema::class));
 
         $clone = $table->where($where = $this->createMock(ExprInterface::class));
 
@@ -64,8 +45,7 @@ class TableTest extends TestCase
 
     public function testWhereAnd()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test', $this->createMock(Schema::class));
+        $table = new Table('test', $this->createMock(Schema::class));
 
         $expr1 = $this->createMock(ExprInterface::class);
         $expr2 = $this->createMock(ExprInterface::class);
@@ -83,8 +63,7 @@ class TableTest extends TestCase
 
     public function testWhereOr()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test', $this->createMock(Schema::class));
+        $table = new Table('test', $this->createMock(Schema::class));
 
         $expr1 = $this->createMock(ExprInterface::class);
         $expr2 = $this->createMock(ExprInterface::class);
@@ -102,8 +81,7 @@ class TableTest extends TestCase
 
     public function testColumn()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test');
+        $table = new Table('test');
 
         $term = $table->column($value = 'foobar');
 
@@ -113,14 +91,13 @@ class TableTest extends TestCase
 
     public function testColumnExistsWithSchema()
     {
-        $config = $this->createMock(Config::class);
         $schema = $this->createMock(Schema::class);
         $schema->method('getColumns')->willReturn([
             'foo' => new Schema\Column(''),
             'bar' => new Schema\Column(''),
         ]);
 
-        $table = new Table($config, 'test', $schema);
+        $table = new Table('test', $schema);
 
         $term = $table->column($value = 'foo');
 
@@ -130,14 +107,13 @@ class TableTest extends TestCase
 
     public function testColumnNotExistsWithSchema()
     {
-        $config = $this->createMock(Config::class);
         $schema = $this->createMock(Schema::class);
         $schema->method('getColumns')->willReturn([
             'foo' => new Schema\Column(''),
             'bar' => new Schema\Column(''),
         ]);
 
-        $table = new Table($config, 'test', $schema);
+        $table = new Table('test', $schema);
 
         try {
             $table->column('oopsie');
@@ -149,291 +125,188 @@ class TableTest extends TestCase
 
     public function testOrderBy()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test');
+        $table = new Table('test');
 
-        $clone = $table->orderBy($order = [
-            $this->createMock(Order::class),
-            $this->createMock(Order::class),
-        ]);
+        $clone = $table->orderBy(
+            $order = [
+                $this->createMock(Order::class),
+                $this->createMock(Order::class),
+            ]
+        );
 
         $this->assertSame($order, $clone->getOrder());
     }
 
     public function testOrderByTwice()
     {
-        $config = $this->createMock(Config::class);
-        $table = new Table($config, 'test');
+        $table = new Table('test');
 
-        $clone = $table->orderBy($order1 = [
-            $this->createMock(Order::class),
-            $this->createMock(Order::class),
-        ]);
+        $clone = $table->orderBy(
+            $order1 = [
+                $this->createMock(Order::class),
+                $this->createMock(Order::class),
+            ]
+        );
 
-        $clone2 = $clone->orderBy($order2 = [
-            $this->createMock(Order::class),
-            $this->createMock(Order::class),
-        ]);
+        $clone2 = $clone->orderBy(
+            $order2 = [
+                $this->createMock(Order::class),
+                $this->createMock(Order::class),
+            ]
+        );
 
         $this->assertSame(array_merge($order1, $order2), $clone2->getOrder());
     }
 
-    public function testCreate()
+    public function provideDataForCreate(): array
     {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::CREATE_TABLE)
-               ->willReturn(new CreateTable());
-
-        $table = new Table($config, $name = 'test', $schema = $this->createMock(Schema::class));
-        $query = $table->create()[0];
-
-        $this->assertEquals($name, $query->get(CreateTable::NAME));
-        $this->assertSame($schema, $query->get(CreateTable::SCHEMA));
-        $this->assertTrue($query->get(CreateTable::IF_NOT_EXISTS));
-        $this->assertNull($query->get(CreateTable::COLLATE));
-        $this->assertInstanceOf(CreateTable::class, $query->getType());
+        return [
+            'no collate' => [false, null],
+            'with collate' => [false, 'utf8'],
+            'if not exists, no collate' => [true, null],
+            'if not exists, with collate' => [true, 'utf8'],
+        ];
     }
 
-    public function testCreateIfNotExistsFalse()
+    /** @dataProvider provideDataForCreate */
+    public function testCreate(bool $ifNotExists, ?string $collate)
     {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::CREATE_TABLE)
-               ->willReturn(new CreateTable());
+        $table = new Table($name = 'test', $schema = $this->createMock(Schema::class));
+        $queries = $table->create($ifNotExists, $collate);
 
-        $table = new Table($config, $name = 'test', $schema = $this->createMock(Schema::class));
-        $query = $table->create(false)[0];
-
-        $this->assertEquals($name, $query->get(CreateTable::NAME));
-        $this->assertSame($schema, $query->get(CreateTable::SCHEMA));
-        $this->assertFalse($query->get(CreateTable::IF_NOT_EXISTS));
-        $this->assertNull($query->get(CreateTable::COLLATE));
-    }
-
-    public function testCreateCollate()
-    {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::CREATE_TABLE)
-               ->willReturn(new CreateTable());
-
-        $table = new Table($config, $name = 'test', $schema = $this->createMock(Schema::class));
-        $query = $table->create(true, $collate = 'utf8_unicode_ci')[0];
-
-        $this->assertEquals($name, $query->get(CreateTable::NAME));
-        $this->assertSame($schema, $query->get(CreateTable::SCHEMA));
-        $this->assertTrue($query->get(CreateTable::IF_NOT_EXISTS));
-        $this->assertEquals($collate, $query->get(CreateTable::COLLATE));
+        $this->assertCount(1, $queries);
+        $this->assertInstanceOf(CreateTableQuery::class, $query = $queries[0]);
+        $this->assertEquals($name, Helpers::property($query, 'name'));
+        $this->assertEquals($ifNotExists, Helpers::property($query, 'ifNotExists'));
+        $this->assertEquals($collate, Helpers::property($query, 'collate'));
+        $this->assertSame($schema, Helpers::property($query, 'schema'));
     }
 
     public function testCreateWithIndexes()
     {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->exactly(3))
-               ->method('getQueryType')
-               ->withConsecutive([QueryType::CREATE_TABLE], [QueryType::CREATE_INDEX], [QueryType::CREATE_INDEX])
-               ->willReturnOnConsecutiveCalls(new CreateTable(), new CreateIndex(), new CreateIndex());
-
         $schema = new Schema([], [], [], [
             'index1' => $index1 = new Schema\Index(false, []),
             'index2' => $index2 = new Schema\Index(false, []),
         ]);
 
-        $table = new Table($config, 'test', $schema);
+        $table = new Table('test', $schema);
         $queries = $table->create();
 
         $this->assertCount(3, $queries);
 
-        $this->assertInstanceOf(CreateIndex::class, $queries[1]->getType());
-        $this->assertInstanceOf(CreateIndex::class, $queries[2]->getType());
-        $this->assertEquals('test', $queries[1]->get(CreateIndex::TABLE));
-        $this->assertEquals('test', $queries[2]->get(CreateIndex::TABLE));
-        $this->assertEquals('index1', $queries[1]->get(CreateIndex::NAME));
-        $this->assertEquals('index2', $queries[2]->get(CreateIndex::NAME));
-        $this->assertEquals($index1, $queries[1]->get(CreateIndex::INDEX));
-        $this->assertEquals($index2, $queries[2]->get(CreateIndex::INDEX));
+        $this->assertInstanceOf(CreateIndexQuery::class, $queries[1]);
+        $this->assertInstanceOf(CreateIndexQuery::class, $queries[2]);
+        $this->assertEquals('test', Helpers::property($queries[1], 'table'));
+        $this->assertEquals('test', Helpers::property($queries[2], 'table'));
+        $this->assertEquals('index1', Helpers::property($queries[1], 'name'));
+        $this->assertEquals('index2', Helpers::property($queries[2], 'name'));
+        $this->assertEquals($index1, Helpers::property($queries[1], 'index'));
+        $this->assertEquals($index2, Helpers::property($queries[2], 'index'));
     }
 
-    public function testDrop()
+    public function provideDataForDrop(): array
     {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::DROP_TABLE)
-               ->willReturn(new DropTable());
-
-        $table = new Table($config, $name = 'test', $this->createMock(Schema::class));
-        $query = $table->drop();
-
-        $this->assertEquals($name, $query->get(DropTable::TABLE));
-        $this->assertTrue($query->get(DropTable::IF_EXISTS));
-        $this->assertFalse($query->get(DropTable::CASCADE));
+        return [
+            'cascade' => [false, true],
+            'no cascade' => [false, false],
+            'if exists, cascade' => [true, true],
+            'if exists, no cascade' => [true, false],
+        ];
     }
 
-    public function testDropIfExistsFalse()
+    /** @dataProvider provideDataForDrop */
+    public function testDrop(bool $ifExists, bool $cascade)
     {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::DROP_TABLE)
-               ->willReturn(new DropTable());
+        $table = new Table($name = 'test', $this->createMock(Schema::class));
+        $query = $table->drop($ifExists, $cascade);
 
-        $table = new Table($config, $name = 'test', $this->createMock(Schema::class));
-        $query = $table->drop(false);
-
-        $this->assertEquals($name, $query->get(DropTable::TABLE));
-        $this->assertFalse($query->get(DropTable::IF_EXISTS));
-        $this->assertFalse($query->get(DropTable::CASCADE));
-    }
-
-    public function testDropCascade()
-    {
-        $config = $this->createMock(Config::class);
-        $config->expects($this->once())
-               ->method('getQueryType')
-               ->with(QueryType::DROP_TABLE)
-               ->willReturn(new DropTable());
-
-        $table = new Table($config, $name = 'test', $this->createMock(Schema::class));
-        $query = $table->drop(true, true);
-
-        $this->assertEquals($name, $query->get(DropTable::TABLE));
-        $this->assertTrue($query->get(DropTable::IF_EXISTS));
-        $this->assertTrue($query->get(DropTable::CASCADE));
+        $this->assertEquals($name, Helpers::property($query, 'table'));
+        $this->assertEquals($ifExists, Helpers::property($query, 'ifExists'));
+        $this->assertEquals($cascade, Helpers::property($query, 'cascade'));
     }
 
     public function testSelect()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::SELECT)->willReturn(new QueryType\Select());
-
-        $table = new Table($config, $name = 'test');
+        $table = new Table($name = 'test');
 
         $columns = ['foo', 'bar'];
         $where = $this->createMock(ExprInterface::class);
+        $group = [Group::by('foo')];
+        $having = $this->createMock(ExprInterface::class);
         $order = [Order::by('foo')];
         $limit = 19;
         $offset = 4;
 
-        $query = $table->select($columns, $where, $order, $limit, $offset);
+        $query = $table->select($columns, $where, $group, $having, $order, $limit, $offset);
 
-        $this->assertEquals($name, $query->get(QueryType\Select::FROM));
-        $this->assertEquals($columns, $query->get(QueryType\Select::COLUMNS));
-        $this->assertEquals($where, $query->get(QueryType\Select::WHERE));
-        $this->assertEquals($order, $query->get(QueryType\Select::ORDER));
-        $this->assertEquals($limit, $query->get(QueryType\Select::LIMIT));
-        $this->assertEquals($offset, $query->get(QueryType\Select::OFFSET));
+        $this->assertEquals($name, Helpers::property($query, 'from'));
+        $this->assertEquals($columns, Helpers::property($query, 'columns'));
+        $this->assertEquals($where, Helpers::property($query, 'where'));
+        $this->assertEquals($group, Helpers::property($query, 'group'));
+        $this->assertEquals($having, Helpers::property($query, 'having'));
+        $this->assertEquals($order, Helpers::property($query, 'order'));
+        $this->assertEquals($limit, Helpers::property($query, 'limit'));
+        $this->assertEquals($offset, Helpers::property($query, 'offset'));
     }
 
     public function testSelectWithWhereState()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::SELECT)->willReturn(new QueryType\Select());
-
         $where = $this->createMock(ExprInterface::class);
 
-        $table = new Table($config, 'test');
+        $table = new Table('test');
         $table = $table->where($where);
 
         $query = $table->select();
 
-        $this->assertEquals($where, $query->get(QueryType\Select::WHERE));
+        $this->assertEquals($where, Helpers::property($query, 'where'));
     }
 
     public function testSelectWithWhereStateAndArg()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::SELECT)->willReturn(new QueryType\Select());
-
         $whereState = $this->createMock(ExprInterface::class);
         $whereArg = $this->createMock(ExprInterface::class);
         $whereFinal = $this->createMock(BinaryExpr::class);
 
         $whereState->expects($this->once())->method('and')->with($whereArg)->willReturn($whereFinal);
 
-        $table = new Table($config, 'test');
+        $table = new Table('test');
         $table = $table->where($whereState);
 
-        $query = $table->select(null, $whereArg);
+        $query = $table->select([], $whereArg);
 
-        $this->assertEquals($whereFinal, $query->get(QueryType\Select::WHERE));
+        $this->assertEquals($whereFinal, Helpers::property($query, 'where'));
     }
 
     public function testSelectWithOrderState()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::SELECT)->willReturn(new QueryType\Select());
-
         $order = [Order::by('foo'), Order::by('bar')];
 
-        $table = new Table($config, 'test');
+        $table = new Table('test');
         $table = $table->orderBy($order);
 
         $query = $table->select();
 
-        $this->assertEquals($order, $query->get(QueryType\Select::ORDER));
+        $this->assertEquals($order, Helpers::property($query, 'order'));
     }
 
     public function testSelectWithOrderStateAndArg()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::SELECT)->willReturn(new QueryType\Select());
-
         $order1 = Order::by('foo');
         $order2 = Order::by('bar');
         $order3 = Order::by('baz');
         $order4 = Order::by('qux');
 
-        $table = new Table($config, 'test');
+        $table = new Table('test');
         $table = $table->orderBy([$order1, $order2]);
 
-        $query = $table->select(null, null, [$order3, $order4]);
+        $query = $table->select([], null, [], null, [$order3, $order4]);
 
-        $this->assertEquals([$order1, $order2, $order3, $order4], $query->get(QueryType\Select::ORDER));
+        $this->assertEquals([$order1, $order2, $order3, $order4], Helpers::property($query, 'order'));
     }
 
     public function testInsertColumns()
     {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
-
         $values = [
-            ['a' => 1, 'b' => 2, 'c' => 3],
-            ['d' => 4, 'e' => 5, 'f' => 6],
-        ];
-
-        $table = new Table($config, 'test');
-        $query = $table->insert($values);
-
-        $this->assertEquals(['a', 'b', 'c'], $query->get(QueryType\Insert::COLUMNS));
-    }
-
-    public function testInsertValues()
-    {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
-
-        $values = [
-            ['a' => 1, 'b' => 2, 'c' => 3],
-            ['a' => 4, 'b' => 5, 'd' => 6],
-        ];
-
-        $table = new Table($config, 'test');
-        $query = $table->insert($values);
-
-        $this->assertEquals($values, $query->get(QueryType\Insert::VALUES));
-    }
-
-    public function testInsertOnDuplicateKey()
-    {
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with(QueryType::INSERT)->willReturn(new QueryType\Insert());
-
-        $records = [
             ['a' => 1, 'b' => 2, 'c' => 3],
             ['d' => 4, 'e' => 5, 'f' => 6],
         ];
@@ -444,26 +317,11 @@ class TableTest extends TestCase
             'c' => 88.8,
         ];
 
-        $table = new Table($config, 'test');
-        $query = $table->insert($records, $assignList);
+        $table = new Table('test');
+        $query = $table->insert($values, $assignList);
 
-        $this->assertEquals($assignList, $query->get(QueryType\Insert::ON_DUPLICATE_KEY));
-    }
-
-    public function testQuery()
-    {
-        $type = $this->createMock(QueryTypeInterface::class);
-
-        $config = $this->createMock(Config::class);
-        $config->method('getQueryType')->with('custom')->willReturn($type);
-
-        $table = new Table($config, 'foobar');
-        $query = $table->query('custom', [
-            'data' => 123
-        ]);
-
-        $this->assertSame($type, $query->getType());
-        $this->assertEquals('foobar', $query->get('table'));
-        $this->assertEquals(123, $query->get('data'));
+        $this->assertEquals(['a', 'b', 'c'], Helpers::property($query, 'columns'));
+        $this->assertEquals($values, Helpers::property($query, 'values'));
+        $this->assertEquals($assignList, Helpers::property($query, 'assignList'));
     }
 }

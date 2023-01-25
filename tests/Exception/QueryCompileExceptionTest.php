@@ -2,9 +2,9 @@
 
 namespace RebelCode\Atlas\Test\Exception;
 
-use RebelCode\Atlas\Exception\QueryCompileException;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Query;
+use RebelCode\Atlas\Exception\QueryCompileException;
 use RuntimeException;
 use Throwable;
 
