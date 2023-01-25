@@ -24,16 +24,12 @@ class Table
 {
     /** @var Config */
     protected $config;
-
     /** @var string */
     protected $name;
-
     /** @var Schema|null */
     protected $schema;
-
     /** @var ExprInterface|null */
     protected $where;
-
     /** @var Order[] */
     protected $order;
 
@@ -306,9 +302,10 @@ class Table
      */
     public function query(string $type, array $data): Query
     {
-        return new Query($this->getQueryType($type), array_merge($data, [
-            'table' => $this->name,
-        ]));
+        return new Query(
+            $this->getQueryType($type),
+            array_merge($data, ['table' => $this->name])
+        );
     }
 
     /**
