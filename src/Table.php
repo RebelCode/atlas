@@ -251,7 +251,7 @@ class Table
      *
      * @param array $set An associative array with column names as keys and the update values as array values.
      * @param ExprInterface|null $where Optional WHERE condition.
-     * @param Order[]|null $order Optional list of order instances.
+     * @param Order[] $order Optional list of order instances.
      * @param int|null $limit Optional LIMIT.
      * @return UpdateQuery The created query.
      */
@@ -275,13 +275,13 @@ class Table
      * Creates a DELETE query for the table.
      *
      * @param ExprInterface|null $where Optional WHERE condition.
-     * @param Order[]|null $order Optional list of order instances.
+     * @param Order[] $order Optional list of order instances.
      * @param int|null $limit Optional LIMIT.
      * @return DeleteQuery The created query.
      */
     public function delete(
         ?ExprInterface $where = null,
-        ?array $order = null,
+        array $order = [],
         ?int $limit = null
     ): DeleteQuery {
         return new DeleteQuery(
