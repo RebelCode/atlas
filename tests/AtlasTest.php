@@ -26,22 +26,6 @@ class AtlasTest extends TestCase
         $this->assertCount(0, $atlas->getTables());
     }
 
-    public function testDefault()
-    {
-        $atlas = Atlas::createDefault();
-
-        $this->assertNull($atlas->getDbAdapter());
-        $this->assertCount(0, $atlas->getTables());
-    }
-
-    public function testDefaultWithAdapter()
-    {
-        $adapter = $this->createMock(DatabaseAdapter::class);
-        $atlas = Atlas::createDefault($adapter);
-
-        $this->assertSame($adapter, $atlas->getDbAdapter());
-    }
-
     public function testTable()
     {
         $adapter = $this->createMock(DatabaseAdapter::class);

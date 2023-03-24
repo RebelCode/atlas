@@ -39,9 +39,4 @@ class Atlas
     {
         return $this->tables;
     }
-
-    public static function createDefault(?DatabaseAdapter $adapter = null): self
-    {
-        return new self($adapter);
-    }
 }
