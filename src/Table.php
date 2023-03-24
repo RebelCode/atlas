@@ -17,16 +17,12 @@ use RebelCode\Atlas\Query\UpdateQuery;
 /** @psalm-immutable */
 class Table
 {
-    /** @var string */
-    protected $name;
-    /** @var Schema|null */
-    protected $schema;
-    /** @var DatabaseAdapter|null */
-    protected $adapter;
-    /** @var ExprInterface|null */
-    protected $where;
+    protected string $name;
+    protected ?Schema $schema = null;
+    protected ?DatabaseAdapter $adapter = null;
+    protected ?ExprInterface $where = null;
     /** @var Order[] */
-    protected $order;
+    protected array $order = [];
 
     /**
      * Constructor.

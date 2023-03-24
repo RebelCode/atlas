@@ -8,8 +8,7 @@ use RebelCode\Atlas\Exception\QueryCompileException;
 
 abstract class Query
 {
-    /** @var DatabaseAdapter|null */
-    protected $adapter;
+    protected ?DatabaseAdapter $adapter;
 
     /**
      * Constructor.

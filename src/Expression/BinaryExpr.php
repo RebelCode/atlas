@@ -37,12 +37,9 @@ class BinaryExpr extends BaseExpr
     const AND = 'AND';
     const OR = 'OR';
     const XOR = 'XOR';
-    /** @var ExprInterface */
-    protected $left;
-    /** @var string */
-    protected $operator;
-    /** @var ExprInterface */
-    protected $right;
+    protected ExprInterface $left;
+    protected string $operator;
+    protected ExprInterface $right;
 
     /** Constructor */
     public function __construct(ExprInterface $left, string $operator, ExprInterface $right)

@@ -16,15 +16,9 @@ class Term extends BaseExpr
 
     /** @var mixed */
     protected $value;
-
-    /**
-     * @var int
-     * @psalm-var Term::*
-     */
-    protected $type;
-
-    /** @var bool */
-    protected $distinct;
+    /** @psalm-var Term::* */
+    protected int $type;
+    protected bool $distinct;
 
     /**
      * Constructor.

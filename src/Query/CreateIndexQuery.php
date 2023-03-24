@@ -12,12 +12,9 @@ use Throwable;
 
 class CreateIndexQuery extends Query
 {
-    /** @var string */
-    protected $table;
-    /** @var string */
-    protected $name;
-    /** @var Index */
-    protected $index;
+    protected string $table;
+    protected string $name;
+    protected Index $index;
 
     /**
      * Constructor.

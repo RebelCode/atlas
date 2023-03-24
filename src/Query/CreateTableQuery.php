@@ -13,14 +13,10 @@ use UnexpectedValueException;
 
 class CreateTableQuery extends Query
 {
-    /** @var string */
-    protected $name;
-    /** @var bool */
-    protected $ifNotExists;
-    /** @var Schema */
-    protected $schema;
-    /** @var string|null */
-    protected $collate;
+    protected string $name;
+    protected bool $ifNotExists;
+    protected Schema $schema;
+    protected ?string $collate;
 
     /**
      * Constructor.

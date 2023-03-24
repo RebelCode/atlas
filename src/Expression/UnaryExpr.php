@@ -8,12 +8,8 @@ class UnaryExpr extends BaseExpr
     public const NOT = '!';
     public const NEG = '-';
     public const B_NEG = '~';
-
-    /** @var string */
-    protected $operator;
-
-    /** @var ExprInterface */
-    protected $operand;
+    protected string $operator;
+    protected ExprInterface $operand;
 
     /** Constructor */
     public function __construct(string $operator, ExprInterface $term)

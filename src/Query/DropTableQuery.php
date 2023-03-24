@@ -10,12 +10,9 @@ use Throwable;
 
 class DropTableQuery extends Query
 {
-    /** @var string */
-    protected $table;
-    /** @var bool */
-    protected $ifExists;
-    /** @var bool */
-    protected $cascade;
+    protected string $table;
+    protected bool $ifExists;
+    protected bool $cascade;
 
     /**
      * Constructor.
