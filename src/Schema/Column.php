@@ -28,7 +28,7 @@ class Column
         bool $autoInc = false
     ) {
         $this->type = $type;
-        $this->defaultValue = $defaultVal !== null ? Term::create($defaultVal): null;
+        $this->defaultValue = $defaultVal !== null ? Term::create($defaultVal) : null;
         $this->isNullable = $isNullable;
         $this->autoInc = $autoInc;
     }
@@ -68,7 +68,7 @@ class Column
     public function default($defaultVal): self
     {
         $clone = clone $this;
-        $clone->defaultValue = $defaultVal !== null ? Term::create($defaultVal): null;
+        $clone->defaultValue = $defaultVal !== null ? Term::create($defaultVal) : null;
         return $clone;
     }
 
@@ -86,6 +86,23 @@ class Column
         $clone = clone $this;
         $clone->autoInc = $autoInc;
         return $clone;
+    }
+
+    public function toSql(string $name): string
+    {
+        $parts = ["`$name`", $this->type];
+
+        if ($this->defaultValue !== null) {
+            $parts[] = "DEFAULT " . $this->defaultValue->toSql();
+        } else {
+            $parts[] = $this->isNullable ? 'NULL' : 'NOT NULL';
+        }
+
+        if ($this->autoInc) {
+            $parts[] = 'AUTO_INCREMENT';
+        }
+
+        return implode(' ', $parts);
     }
 
     /** Helper static method to aid fluent creation of columns. */

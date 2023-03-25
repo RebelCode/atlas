@@ -85,20 +85,7 @@ class CreateTableQuery extends Query
         $lines = [];
 
         foreach ($schema->getColumns() as $name => $column) {
-            $parts = ["`$name`", $column->getType()];
-
-            $defaultVal = $column->getDefaultValue();
-            if ($defaultVal !== null) {
-                $parts[] = "DEFAULT " . $defaultVal->toSql();
-            } else {
-                $parts[] = $column->getIsNullable() ? 'NULL' : 'NOT NULL';
-            }
-
-            if ($column->getIsAutoInc()) {
-                $parts[] = 'AUTO_INCREMENT';
-            }
-
-            $lines[] = implode(' ', $parts);
+            $lines[] = $column->toSql($name);
         }
 
         foreach ($schema->getKeys() as $name => $key) {

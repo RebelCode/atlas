@@ -117,4 +117,36 @@ class ColumnTest extends TestCase
 
         $this->assertEquals('TEST', $column->getType(), 'The type was not properly set');
     }
+
+    public function testToSql()
+    {
+        $column = new Column('TEST');
+        $actual = $column->toSql('foo');
+
+        $this->assertEquals('`foo` TEST NULL', $actual, 'The SQL string was not properly generated');
+    }
+
+    public function testToSqlWithDefault()
+    {
+        $column = new Column('TEST', Term::create('bar'));
+        $actual = $column->toSql('foo');
+
+        $this->assertEquals('`foo` TEST DEFAULT \'bar\'', $actual, 'The SQL string was not properly generated');
+    }
+
+    public function testToSqlNotNull()
+    {
+        $column = new Column('TEST', null, false);
+        $actual = $column->toSql('foo');
+
+        $this->assertEquals('`foo` TEST NOT NULL', $actual, 'The SQL string was not properly generated');
+    }
+
+    public function testToSqlWithAutoInc()
+    {
+        $column = new Column('TEST', null, false, true);
+        $actual = $column->toSql('foo');
+
+        $this->assertEquals('`foo` TEST NOT NULL AUTO_INCREMENT', $actual, 'The SQL string was not properly generated');
+    }
 }
