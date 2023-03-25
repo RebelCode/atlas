@@ -32,21 +32,6 @@ class Join
         $this->condition = $condition;
     }
 
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function getTable(): DataSource
-    {
-        return $this->table;
-    }
-
-    public function getCondition(): ?ExprInterface
-    {
-        return $this->condition;
-    }
-
     public function type(string $type): self
     {
         $new = clone $this;
