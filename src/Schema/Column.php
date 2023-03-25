@@ -81,6 +81,12 @@ class Column
     }
 
     /** @return static */
+    public function notNull(): self
+    {
+        return $this->nullable(false);
+    }
+
+    /** @return static */
     public function autoInc(bool $autoInc = true): self
     {
         $clone = clone $this;

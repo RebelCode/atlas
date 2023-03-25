@@ -84,6 +84,15 @@ class ColumnTest extends TestCase
         $this->assertFalse($column->getIsNullable(), 'The original instance should not be mutated');
     }
 
+    public function testNotNull()
+    {
+        $column = new Column('test', 'foobar', true);
+        $clone = $column->notNull();
+
+        $this->assertFalse($clone->getIsNullable(), 'The nullability in the clone was not set to false');
+        $this->assertTrue($column->getIsNullable(), 'The original instance should not be mutated');
+    }
+
     public function testWithAutoIncrementFalse()
     {
         $column = new Column('test', 'foobar', true, true);
