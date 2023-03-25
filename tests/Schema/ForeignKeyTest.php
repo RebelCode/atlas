@@ -11,7 +11,7 @@ class ForeignKeyTest extends TestCase
     {
         $fk = new ForeignKey('foobar', []);
 
-        $this->assertEquals('foobar', $fk->getForeignTable());
+        $this->assertEquals('foobar', $fk->getTable());
     }
 
     public function testConstructorMappings()

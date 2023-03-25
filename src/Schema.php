@@ -3,7 +3,6 @@
 namespace RebelCode\Atlas;
 
 use RebelCode\Atlas\Schema\Column;
-use RebelCode\Atlas\Schema\ForeignKey;
 use RebelCode\Atlas\Schema\Index;
 use RebelCode\Atlas\Schema\Key;
 
@@ -14,22 +13,20 @@ class Schema
     protected array $columns;
     /** @var array<string,Key> */
     protected array $keys;
-    /** @var array<string,ForeignKey> */
-    protected array $foreignKeys;
     /** @var array<string,Index> */
     protected array $indexes;
 
     /**
+     * Constructor.
+     *
      * @param array<string,Column> $columns A mapping of columns, keyed by their name.
      * @param array<string,Key> $keys A mapping of keys, keyed by their name.
-     * @param array<string,ForeignKey> $foreignKeys A mapping of foreign keys, keyed by their name.
      * @param array<string,Index> $indexes A mapping of indexes, keyed by their name.
      */
-    public function __construct(array $columns, array $keys = [], array $foreignKeys = [], array $indexes = [])
+    public function __construct(array $columns, array $keys = [], array $indexes = [])
     {
         $this->columns = $columns;
         $this->keys = $keys;
-        $this->foreignKeys = $foreignKeys;
         $this->indexes = $indexes;
     }
 
@@ -43,12 +40,6 @@ class Schema
     public function getKeys(): array
     {
         return $this->keys;
-    }
-
-    /** @return array<string,ForeignKey> */
-    public function getForeignKeys(): array
-    {
-        return $this->foreignKeys;
     }
 
     /** @return array<string,Index> */
@@ -123,41 +114,6 @@ class Schema
         $clone = clone $this;
         foreach ($keys as $key) {
             unset($clone->keys[$key]);
-        }
-        return $clone;
-    }
-
-    /**
-     * @param array<string,ForeignKey> $foreignKeys A mapping of foreign keys, keyed by their name.
-     * @return static
-     */
-    public function withForeignKeys(array $foreignKeys): self
-    {
-        $clone = clone $this;
-        $clone->foreignKeys = $foreignKeys;
-        return $clone;
-    }
-
-    /**
-     * @param array<string,ForeignKey> $foreignKeys A mapping of foreign keys, keyed by their name.
-     * @return static
-     */
-    public function withAddedForeignKeys(array $foreignKeys): self
-    {
-        $clone = clone $this;
-        $clone->foreignKeys = array_merge($clone->foreignKeys, $foreignKeys);
-        return $clone;
-    }
-
-    /**
-     * @param list<string> $foreignKeys The names of the foreign keys to omit.
-     * @return static
-     */
-    public function withoutForeignKeys(array $foreignKeys): self
-    {
-        $clone = clone $this;
-        foreach ($foreignKeys as $key) {
-            unset($clone->foreignKeys[$key]);
         }
         return $clone;
     }

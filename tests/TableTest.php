@@ -227,7 +227,7 @@ class TableTest extends TestCase
 
     public function testCreateWithIndexes()
     {
-        $schema = new Schema([], [], [], [
+        $schema = new Schema([], [], [
             'index1' => $index1 = new Schema\Index(false, []),
             'index2' => $index2 = new Schema\Index(false, []),
         ]);

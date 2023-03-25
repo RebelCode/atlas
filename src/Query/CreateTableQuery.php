@@ -7,7 +7,6 @@ use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Schema;
-use RebelCode\Atlas\Schema\ForeignKey;
 use Throwable;
 use UnexpectedValueException;
 
@@ -103,34 +102,7 @@ class CreateTableQuery extends Query
         }
 
         foreach ($schema->getKeys() as $name => $key) {
-            $type = $key->isPrimary() ? "PRIMARY KEY" : "UNIQUE";
-
-            $columns = $key->getColumns();
-            $columnsStr = implode('`, `', $columns);
-
-            $lines[] = "CONSTRAINT `$name` $type (`$columnsStr`)";
-        }
-
-        foreach ($schema->getForeignKeys() as $name => $foreignKey) {
-            $mappings = $foreignKey->getMappings();
-            $foreignTable = $foreignKey->getForeignTable();
-            $updateRule = $foreignKey->getUpdateRule();
-            $deleteRule = $foreignKey->getDeleteRule();
-
-            $tableColumns = implode('`, `', array_keys($mappings));
-            $foreignColumns = implode('`, `', array_values($mappings));
-
-            $constraint = "CONSTRAINT `$name` FOREIGN KEY (`$tableColumns`) REFERENCES `$foreignTable` (`$foreignColumns`)";
-
-            if ($updateRule !== ForeignKey::RESTRICT) {
-                $constraint .= " ON UPDATE " . $updateRule;
-            }
-
-            if ($deleteRule !== ForeignKey::RESTRICT) {
-                $constraint .= ' ON DELETE ' . $deleteRule;
-            }
-
-            $lines[] = $constraint;
+            $lines[] = $key->toSql($name);
         }
 
         return implode(",\n  ", $lines);

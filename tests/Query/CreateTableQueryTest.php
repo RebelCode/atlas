@@ -10,7 +10,6 @@ use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Schema\Column;
 use RebelCode\Atlas\Schema\ForeignKey;
-use RebelCode\Atlas\Schema\Key;
 use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class CreateTableQueryTest extends TestCase
@@ -61,10 +60,10 @@ class CreateTableQueryTest extends TestCase
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT DEFAULT 1
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT DEFAULT 1
+        )
+        QUERY;
 
         $this->assertEquals($expected, $query->toSql());
     }
@@ -77,10 +76,10 @@ QUERY;
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT DEFAULT 1
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT DEFAULT 1
+        )
+        QUERY;
 
         $this->assertEquals($expected, $query->toSql());
     }
@@ -93,10 +92,10 @@ QUERY;
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT NULL
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT NULL
+        )
+        QUERY;
 
         $this->assertEquals($expected, $query->toSql());
     }
@@ -109,10 +108,10 @@ QUERY;
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT NOT NULL
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT NOT NULL
+        )
+        QUERY;
 
         $this->assertEquals($expected, $query->toSql());
     }
@@ -125,10 +124,10 @@ QUERY;
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT NOT NULL AUTO_INCREMENT
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT NOT NULL AUTO_INCREMENT
+        )
+        QUERY;
 
         $this->assertEquals($expected, $query->toSql());
     }
@@ -144,12 +143,12 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  `foo` INT NOT NULL AUTO_INCREMENT,
-  `bar` VARCHAR(10) NULL,
-  `baz` REAL DEFAULT 6.9
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          `foo` INT NOT NULL AUTO_INCREMENT,
+          `bar` VARCHAR(10) NULL,
+          `baz` REAL DEFAULT 6.9
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -160,17 +159,17 @@ QUERY;
             [], // Columns
             [
                 /* Keys */
-                'foo_bar_unique' => new Key(false, ['foo', 'bar']),
+                'foo_bar_unique' => new Schema\UniqueKey(['foo', 'bar']),
             ]
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `foo_bar_unique` UNIQUE (`foo`, `bar`)
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `foo_bar_unique` UNIQUE (`foo`, `bar`)
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -181,17 +180,17 @@ QUERY;
             [], // Columns
             [
                 /* Keys */
-                'foo_bar_pk' => new Key(true, ['foo', 'bar']),
+                'foo_bar_pk' => new Schema\PrimaryKey(['foo', 'bar']),
             ]
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `foo_bar_pk` PRIMARY KEY (`foo`, `bar`)
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `foo_bar_pk` PRIMARY KEY (`foo`, `bar`)
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -202,19 +201,19 @@ QUERY;
             [], // Columns
             [
                 /* Keys */
-                'foo_pk' => new Key(true, ['foo']),
-                'bar_unique' => new Key(false, ['bar']),
+                'foo_pk' => new Schema\PrimaryKey(['foo']),
+                'bar_unique' => new Schema\UniqueKey(['bar']),
             ]
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `foo_pk` PRIMARY KEY (`foo`),
-  CONSTRAINT `bar_unique` UNIQUE (`bar`)
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `foo_pk` PRIMARY KEY (`foo`),
+          CONSTRAINT `bar_unique` UNIQUE (`bar`)
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -223,7 +222,6 @@ QUERY;
     {
         $schema = new Schema(
             [], // Columns
-            [], // Keys
             [
                 /* Foreign Keys */
                 'test_fk' => new ForeignKey('other_table', [
@@ -235,10 +233,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`)
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`)
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -247,7 +245,6 @@ QUERY;
     {
         $schema = new Schema(
             [], // Columns
-            [], // Keys
             [
                 /* Foreign Keys */
                 'test_fk' => new ForeignKey('other_table', [
@@ -260,10 +257,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `test_fk` FOREIGN KEY (`foo`, `baz`) REFERENCES `other_table` (`bar`, `qux`)
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `test_fk` FOREIGN KEY (`foo`, `baz`) REFERENCES `other_table` (`bar`, `qux`)
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -272,7 +269,6 @@ QUERY;
     {
         $schema = new Schema(
             [], // Columns
-            [], // Keys
             [
                 /* Foreign Keys */
                 'test_fk' => new ForeignKey('other_table', ['foo' => 'bar'], ForeignKey::CASCADE),
@@ -282,10 +278,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE CASCADE
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE CASCADE
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -294,7 +290,6 @@ QUERY;
     {
         $schema = new Schema(
             [], // Columns
-            [], // Keys
             [
                 /* Foreign Keys */
                 'test_fk' => new ForeignKey('other_table', ['foo' => 'bar'], null, ForeignKey::SET_NULL),
@@ -304,10 +299,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON DELETE SET NULL
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON DELETE SET NULL
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -316,7 +311,6 @@ QUERY;
     {
         $schema = new Schema(
             [], // Columns
-            [], // Keys
             [
                 /* Foreign Keys */
                 'test_fk' => new ForeignKey('other_table', ['foo' => 'bar'], ForeignKey::SET_DEFAULT,
@@ -327,10 +321,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE `test_table` (
-  CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE SET DEFAULT ON DELETE CASCADE
-)
-QUERY;
+        CREATE TABLE `test_table` (
+          CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE SET DEFAULT ON DELETE CASCADE
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }
@@ -344,10 +338,10 @@ QUERY;
 
         $actual = $query->toSql();
         $expected = <<<QUERY
-CREATE TABLE IF NOT EXISTS `test_table` (
-  `foo` INT NULL
-)
-QUERY;
+        CREATE TABLE IF NOT EXISTS `test_table` (
+          `foo` INT NULL
+        )
+        QUERY;
 
         $this->assertEquals($expected, $actual);
     }

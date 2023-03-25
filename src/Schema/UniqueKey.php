@@ -2,8 +2,8 @@
 
 namespace RebelCode\Atlas\Schema;
 
-/** @psalm-immutable */
-class PrimaryKey extends Key
+/** @psalm-immutable  */
+class UniqueKey extends Key
 {
     /** @var string[] */
     protected array $columns;
@@ -11,7 +11,7 @@ class PrimaryKey extends Key
     /**
      * Constructor.
      *
-     * @param string[] $columns The columns that make up the primary key.
+     * @param string[] $columns The columns that make up the unique key.
      */
     public function __construct(array $columns)
     {
@@ -22,6 +22,6 @@ class PrimaryKey extends Key
     public function toSql(string $name): string
     {
         $columns = implode('`, `', $this->columns);
-        return "CONSTRAINT `$name` PRIMARY KEY (`$columns`)";
+        return "CONSTRAINT `$name` UNIQUE (`$columns`)";
     }
 }

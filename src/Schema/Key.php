@@ -2,32 +2,48 @@
 
 namespace RebelCode\Atlas\Schema;
 
-/** @psalm-immutable */
-class Key
+abstract class Key
 {
-    protected bool $isPrimary;
-    protected array $columns;
+    /**
+     * Converts the key into an SQL fragment string.
+     *
+     * @psalm-mutation-free
+     * @param string $name The name of the key.
+     * @return string The SQL fragment string.
+     */
+    abstract public function toSql(string $name): string;
 
     /**
-     * Constructor.
+     * Creates a unique key.
      *
-     * @param bool $isPrimary Whether the key is a primary key.
-     * @param list<string> $columns The columns that make up this key.
+     * @param string[] $columns The columns that make up the unique key.
+     * @return UniqueKey The created unique key.
      */
-    public function __construct(bool $isPrimary, array $columns)
+    public static function unique(array $columns): UniqueKey
     {
-        $this->isPrimary = $isPrimary;
-        $this->columns = $columns;
+        return new UniqueKey($columns);
     }
 
-    public function isPrimary(): bool
+    /**
+     * Creates a primary key.
+     *
+     * @param string[] $columns The columns that make up the primary key.
+     * @return PrimaryKey The created primary key.
+     */
+    public static function primary(array $columns): PrimaryKey
     {
-        return $this->isPrimary;
+        return new PrimaryKey($columns);
     }
 
-    /** @return list<string> */
-    public function getColumns(): array
+    /**
+     * Creates a foreign key.
+     *
+     * @param string $table The name of the foreign table.
+     * @param array<string,string> $columns A mapping of local column names to foreign column names.
+     * @return ForeignKey The created foreign key.
+     */
+    public static function foreign(string $table, array $columns): ForeignKey
     {
-        return $this->columns;
+        return new ForeignKey($table, $columns);
     }
 }
