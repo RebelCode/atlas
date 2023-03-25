@@ -34,28 +34,28 @@ class UnaryExprTest extends TestCase
     public function testToString()
     {
         $operand = $this->createMock(ExprInterface::class);
-        $operand->expects($this->once())->method('toString')->willReturn('foo');
+        $operand->expects($this->once())->method('toSql')->willReturn('foo');
 
         $operator = UnaryExpr::NEG;
         $expr = new UnaryExpr($operator, $operand);
 
-        $this->assertEquals('-(foo)', $expr->toString());
+        $this->assertEquals('-(foo)', $expr->toSql());
     }
 
     public function testToStringFunctionName()
     {
         $operand = $this->createMock(ExprInterface::class);
-        $operand->expects($this->once())->method('toString')->willReturn('foo');
+        $operand->expects($this->once())->method('toSql')->willReturn('foo');
 
         $expr = new UnaryExpr('SUM', $operand);
 
-        $this->assertEquals('SUM(foo)', $expr->toString());
+        $this->assertEquals('SUM(foo)', $expr->toSql());
     }
 
     public function testToStringFunctionNameDistinct()
     {
         $expr = new UnaryExpr('SUM', Term::column('foo')->distinct());
 
-        $this->assertEquals('SUM(DISTINCT `foo`)', $expr->toString());
+        $this->assertEquals('SUM(DISTINCT `foo`)', $expr->toSql());
     }
 }

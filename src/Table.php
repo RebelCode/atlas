@@ -15,9 +15,10 @@ use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Query\UpdateQuery;
 
 /** @psalm-immutable */
-class Table
+class Table implements DataSource
 {
     protected string $name;
+    protected ?string $alias = null;
     protected ?Schema $schema = null;
     protected ?DatabaseAdapter $adapter = null;
     protected ?ExprInterface $where = null;
@@ -36,8 +37,16 @@ class Table
         $this->name = $name;
         $this->schema = $schema;
         $this->adapter = $adapter;
-        $this->where = null;
-        $this->order = [];
+    }
+
+    /**
+     * Magic getter for retrieving a column term for this table.
+     *
+     * @param string $name The name of the column.
+     */
+    public function __get($name): Term
+    {
+        return $this->col($name);
     }
 
     /** Retrieves the table's name. */
@@ -78,6 +87,32 @@ class Table
         return $this->order;
     }
 
+    /** @inheritDoc */
+    public function getAlias(): ?string
+    {
+        return $this->alias;
+    }
+
+    /** @inheritDoc */
+    public function compileSource(): string
+    {
+        $nameStr = '`' . $this->name . '`';
+
+        if ($this->alias !== null) {
+            return $nameStr . ' AS `' . $this->alias . '`';
+        } else {
+            return $nameStr;
+        }
+    }
+
+    /** @inheritDoc */
+    public function as(?string $alias): DataSource
+    {
+        $table = clone $this;
+        $table->alias = $alias;
+        return $table;
+    }
+
     /**
      * Begins building an expression with a table's column. Call methods on the returned object to continue building
      * the expression.
@@ -85,13 +120,13 @@ class Table
      * @param string $column The column name.
      * @return Term The created term.
      */
-    public function column(string $column): Term
+    public function col(string $column): Term
     {
         if ($this->schema !== null && !array_key_exists($column, $this->schema->getColumns())) {
             throw new DomainException("Column \"$column\" does not exist on table \"$this->name\"");
         }
 
-        return new Term(Term::COLUMN, $column);
+        return new Term(Term::COLUMN, [$this->name, $column]);
     }
 
     /**
@@ -199,8 +234,6 @@ class Table
      *
      * @param array<Term|string> $columns The columns to select.
      * @param ExprInterface|null $where The WHERE condition.
-     * @param Group[] $group The GROUP BY clause.
-     * @param ExprInterface|null $having The HAVING condition.
      * @param Order[] $order The ORDER BY clause.
      * @param int|null $limit The LIMIT clause.
      * @param int|null $offset The OFFSET clause.
@@ -208,19 +241,15 @@ class Table
     public function select(
         array $columns = [],
         ?ExprInterface $where = null,
-        array $group = [],
-        ?ExprInterface $having = null,
         array $order = [],
         ?int $limit = null,
         ?int $offset = null
     ): SelectQuery {
         return new SelectQuery(
             $this->adapter,
-            $this->name,
+            $this,
             $columns,
             $this->useWhereState($where),
-            $group,
-            $having,
             $this->useOrderState($order),
             $limit,
             $offset
@@ -289,6 +318,12 @@ class Table
         );
     }
 
+    /**
+     * Adds the table's WHERE condition to the given WHERE condition.
+     *
+     * @param ExprInterface|null $where The WHERE condition to add the table's WHERE condition to.
+     * @return ExprInterface|null The merged WHERE condition.
+     */
     protected function useWhereState(?ExprInterface $where): ?ExprInterface
     {
         if (empty($this->where)) {
@@ -300,6 +335,12 @@ class Table
         }
     }
 
+    /**
+     * Adds the table's ordering to the given list of orders.
+     *
+     * @param Order[] $order The list of orders to add the table's ordering to.
+     * @return Order[] The merged list of orders.
+     */
     protected function useOrderState(array $order): array
     {
         if (empty($this->order)) {

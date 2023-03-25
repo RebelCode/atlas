@@ -7,15 +7,17 @@ use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query\CreateIndexQuery;
 use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Table;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class TableTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testConstructor()
     {
         $adapter = $this->createMock(DatabaseAdapter::class);
@@ -79,30 +81,47 @@ class TableTest extends TestCase
         $this->assertEquals($expected, $clone2->getWhere(), 'Final clone does not have expected expression');
     }
 
-    public function testColumn()
+    public function testCol()
     {
         $table = new Table('test');
 
-        $term = $table->column($value = 'foobar');
+        $term = $table->col($value = 'foobar');
 
-        $this->assertEquals($value, $term->getValue());
+        $this->assertEquals(['test', $value], $term->getValue());
         $this->assertEquals(Term::COLUMN, $term->getType());
     }
 
-    public function testColumnExistsWithSchema()
+    public function testColMagicGetter()
     {
-        $schema = $this->createMock(Schema::class);
-        $schema->method('getColumns')->willReturn([
-            'foo' => new Schema\Column(''),
-            'bar' => new Schema\Column(''),
-        ]);
+        $table = new Table('test');
+        $col = $table->foo;
 
-        $table = new Table('test', $schema);
+        $this->assertInstanceOf(Term::class, $col);
+        $this->assertEquals(['test', 'foo'], $col->getValue());
+        $this->assertEquals(Term::COLUMN, $col->getType());
+    }
 
-        $term = $table->column($value = 'foo');
+    public function provideTablePropsForMagicGetterTest(): array
+    {
+        return [
+            'name' => ['name'],
+            'schema' => ['schema'],
+            'alias' => ['alias'],
+            'adapter' => ['adapter'],
+            'where' => ['where'],
+            'order' => ['order'],
+        ];
+    }
 
-        $this->assertEquals($value, $term->getValue());
-        $this->assertEquals(Term::COLUMN, $term->getType());
+    /** @dataProvider provideTablePropsForMagicGetterTest */
+    public function testColMagicGetterWithTableProps(string $name)
+    {
+        $table = new Table('test');
+        $col = $table->$name;
+
+        $this->assertInstanceOf(Term::class, $col);
+        $this->assertEquals(['test', $name], $col->getValue());
+        $this->assertEquals(Term::COLUMN, $col->getType());
     }
 
     public function testColumnNotExistsWithSchema()
@@ -116,7 +135,7 @@ class TableTest extends TestCase
         $table = new Table('test', $schema);
 
         try {
-            $table->column('oopsie');
+            $table->col('oopsie');
             $this->fail('Expected exception to be thrown');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(\DomainException::class, $e);
@@ -158,6 +177,30 @@ class TableTest extends TestCase
         $this->assertSame(array_merge($order1, $order2), $clone2->getOrder());
     }
 
+    public function testAlias()
+    {
+        $table = new Table('test');
+        $aliased = $table->as('foo');
+
+        $this->assertNull($table->getAlias());
+        $this->assertEquals('foo', $aliased->getAlias());
+    }
+
+    public function testCompileSource()
+    {
+        $table = new Table('test');
+
+        $this->assertEquals('`test`', $table->compileSource());
+    }
+
+    public function testCompileWithAlias()
+    {
+        $table = new Table('test');
+        $aliased = $table->as('foo');
+
+        $this->assertEquals('`test` AS `foo`', $aliased->compileSource());
+    }
+
     public function provideDataForCreate(): array
     {
         return [
@@ -176,10 +219,10 @@ class TableTest extends TestCase
 
         $this->assertCount(1, $queries);
         $this->assertInstanceOf(CreateTableQuery::class, $query = $queries[0]);
-        $this->assertEquals($name, Helpers::property($query, 'name'));
-        $this->assertEquals($ifNotExists, Helpers::property($query, 'ifNotExists'));
-        $this->assertEquals($collate, Helpers::property($query, 'collate'));
-        $this->assertSame($schema, Helpers::property($query, 'schema'));
+        $this->assertEquals($name, $this->expose($query)->name);
+        $this->assertEquals($ifNotExists, $this->expose($query)->ifNotExists);
+        $this->assertEquals($collate, $this->expose($query)->collate);
+        $this->assertSame($schema, $this->expose($query)->schema);
     }
 
     public function testCreateWithIndexes()
@@ -196,12 +239,12 @@ class TableTest extends TestCase
 
         $this->assertInstanceOf(CreateIndexQuery::class, $queries[1]);
         $this->assertInstanceOf(CreateIndexQuery::class, $queries[2]);
-        $this->assertEquals('test', Helpers::property($queries[1], 'table'));
-        $this->assertEquals('test', Helpers::property($queries[2], 'table'));
-        $this->assertEquals('index1', Helpers::property($queries[1], 'name'));
-        $this->assertEquals('index2', Helpers::property($queries[2], 'name'));
-        $this->assertEquals($index1, Helpers::property($queries[1], 'index'));
-        $this->assertEquals($index2, Helpers::property($queries[2], 'index'));
+        $this->assertEquals('test', $this->expose($queries[1])->table);
+        $this->assertEquals('test', $this->expose($queries[2])->table);
+        $this->assertEquals('index1', $this->expose($queries[1])->name);
+        $this->assertEquals('index2', $this->expose($queries[2])->name);
+        $this->assertEquals($index1, $this->expose($queries[1])->index);
+        $this->assertEquals($index2, $this->expose($queries[2])->index);
     }
 
     public function provideDataForDrop(): array
@@ -220,9 +263,9 @@ class TableTest extends TestCase
         $table = new Table($name = 'test', $this->createMock(Schema::class));
         $query = $table->drop($ifExists, $cascade);
 
-        $this->assertEquals($name, Helpers::property($query, 'table'));
-        $this->assertEquals($ifExists, Helpers::property($query, 'ifExists'));
-        $this->assertEquals($cascade, Helpers::property($query, 'cascade'));
+        $this->assertEquals($name,  $this->expose($query)->table);
+        $this->assertEquals($ifExists,  $this->expose($query)->ifExists);
+        $this->assertEquals($cascade,  $this->expose($query)->cascade);
     }
 
     public function testSelect()
@@ -231,22 +274,19 @@ class TableTest extends TestCase
 
         $columns = ['foo', 'bar'];
         $where = $this->createMock(ExprInterface::class);
-        $group = [Group::by('foo')];
-        $having = $this->createMock(ExprInterface::class);
         $order = [Order::by('foo')];
         $limit = 19;
         $offset = 4;
 
-        $query = $table->select($columns, $where, $group, $having, $order, $limit, $offset);
+        $query = $table->select($columns, $where, $order, $limit, $offset);
+        $ref = $this->expose($query);
 
-        $this->assertEquals($name, Helpers::property($query, 'from'));
-        $this->assertEquals($columns, Helpers::property($query, 'columns'));
-        $this->assertEquals($where, Helpers::property($query, 'where'));
-        $this->assertEquals($group, Helpers::property($query, 'group'));
-        $this->assertEquals($having, Helpers::property($query, 'having'));
-        $this->assertEquals($order, Helpers::property($query, 'order'));
-        $this->assertEquals($limit, Helpers::property($query, 'limit'));
-        $this->assertEquals($offset, Helpers::property($query, 'offset'));
+        $this->assertEquals($table, $ref->source);
+        $this->assertEquals($columns, $ref->columns);
+        $this->assertEquals($where, $ref->where);
+        $this->assertEquals($order, $ref->order);
+        $this->assertEquals($limit, $ref->limit);
+        $this->assertEquals($offset, $ref->offset);
     }
 
     public function testSelectWithWhereState()
@@ -258,7 +298,7 @@ class TableTest extends TestCase
 
         $query = $table->select();
 
-        $this->assertEquals($where, Helpers::property($query, 'where'));
+        $this->assertEquals($where, $this->expose($query)->where);
     }
 
     public function testSelectWithWhereStateAndArg()
@@ -274,7 +314,7 @@ class TableTest extends TestCase
 
         $query = $table->select([], $whereArg);
 
-        $this->assertEquals($whereFinal, Helpers::property($query, 'where'));
+        $this->assertEquals($whereFinal, $this->expose($query)->where);
     }
 
     public function testSelectWithOrderState()
@@ -286,7 +326,7 @@ class TableTest extends TestCase
 
         $query = $table->select();
 
-        $this->assertEquals($order, Helpers::property($query, 'order'));
+        $this->assertEquals($order, $this->expose($query)->order);
     }
 
     public function testSelectWithOrderStateAndArg()
@@ -299,9 +339,9 @@ class TableTest extends TestCase
         $table = new Table('test');
         $table = $table->orderBy([$order1, $order2]);
 
-        $query = $table->select([], null, [], null, [$order3, $order4]);
+        $query = $table->select([], null, [$order3, $order4]);
 
-        $this->assertEquals([$order1, $order2, $order3, $order4], Helpers::property($query, 'order'));
+        $this->assertEquals([$order1, $order2, $order3, $order4], $this->expose($query)->order);
     }
 
     public function testInsertColumns()
@@ -311,17 +351,17 @@ class TableTest extends TestCase
             ['d' => 4, 'e' => 5, 'f' => 6],
         ];
 
-        $assignList = [
+        $assign = [
             'a' => 'A',
             'b' => $this->createMock(ExprInterface::class),
             'c' => 88.8,
         ];
 
         $table = new Table('test');
-        $query = $table->insert($values, $assignList);
+        $query = $table->insert($values, $assign);
 
-        $this->assertEquals(['a', 'b', 'c'], Helpers::property($query, 'columns'));
-        $this->assertEquals($values, Helpers::property($query, 'values'));
-        $this->assertEquals($assignList, Helpers::property($query, 'assignList'));
+        $this->assertEquals(['a', 'b', 'c'], $this->expose($query)->columns);
+        $this->assertEquals($values, $this->expose($query)->values);
+        $this->assertEquals($assign, $this->expose($query)->assign);
     }
 }

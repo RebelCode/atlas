@@ -4,7 +4,7 @@ namespace RebelCode\Atlas\Test\Exception;
 
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Query;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RuntimeException;
 use Throwable;
 
@@ -13,7 +13,7 @@ class QueryCompileExceptionTest extends TestCase
     public function testIsThrowable()
     {
         $query = $this->createMock(Query::class);
-        $exception = new QueryCompileException('', $query);
+        $exception = new QuerySqlException('', $query);
 
         $this->assertInstanceOf(Throwable::class, $exception);
     }
@@ -21,7 +21,7 @@ class QueryCompileExceptionTest extends TestCase
     public function testIsRuntime()
     {
         $query = $this->createMock(Query::class);
-        $exception = new QueryCompileException('', $query);
+        $exception = new QuerySqlException('', $query);
 
         $this->assertInstanceOf(RuntimeException::class, $exception);
     }
@@ -29,7 +29,7 @@ class QueryCompileExceptionTest extends TestCase
     public function testConstructorNoPrevious()
     {
         $query = $this->createMock(Query::class);
-        $exception = new QueryCompileException($msg = 'Foo bar test message', $query);
+        $exception = new QuerySqlException($msg = 'Foo bar test message', $query);
 
         $this->assertEquals($msg, $exception->getMessage());
         $this->assertSame($query, $exception->getQuery());
@@ -39,7 +39,7 @@ class QueryCompileExceptionTest extends TestCase
     {
         $query = $this->createMock(Query::class);
         $previous = $this->createMock(Throwable::class);
-        $exception = new QueryCompileException($msg = 'Foo bar test message', $query, $previous);
+        $exception = new QuerySqlException($msg = 'Foo bar test message', $query, $previous);
 
         $this->assertEquals($msg, $exception->getMessage());
         $this->assertSame($query, $exception->getQuery());

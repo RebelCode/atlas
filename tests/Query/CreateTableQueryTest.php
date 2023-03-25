@@ -3,18 +3,20 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Schema\Column;
 use RebelCode\Atlas\Schema\ForeignKey;
 use RebelCode\Atlas\Schema\Key;
-use RebelCode\Atlas\Test\Helpers;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class CreateTableQueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testIsQuery()
     {
         $schema = $this->createMock(Schema::class);
@@ -30,10 +32,10 @@ class CreateTableQueryTest extends TestCase
 
         $query = new CreateTableQuery($adapter, $table, $ifNotExists, $schema);
 
-        $this->assertSame($adapter, Helpers::property($query, 'adapter'));
-        $this->assertSame($table, Helpers::property($query, 'name'));
-        $this->assertSame($ifNotExists, Helpers::property($query, 'ifNotExists'));
-        $this->assertSame($schema, Helpers::property($query, 'schema'));
+        $this->assertSame($adapter, $this->expose($query)->adapter);
+        $this->assertSame($table, $this->expose($query)->name);
+        $this->assertSame($ifNotExists, $this->expose($query)->ifNotExists);
+        $this->assertSame($schema, $this->expose($query)->schema);
     }
 
     public function testExec()
@@ -64,7 +66,7 @@ CREATE TABLE `test_table` (
 )
 QUERY;
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileColumnWithDefaultNullable()
@@ -80,7 +82,7 @@ CREATE TABLE `test_table` (
 )
 QUERY;
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileColumnWithoutDefaultNullable()
@@ -96,7 +98,7 @@ CREATE TABLE `test_table` (
 )
 QUERY;
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileColumnWithoutDefaultNotNullable()
@@ -112,7 +114,7 @@ CREATE TABLE `test_table` (
 )
 QUERY;
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileColumnAutoInc()
@@ -128,7 +130,7 @@ CREATE TABLE `test_table` (
 )
 QUERY;
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileMultipleColumns()
@@ -140,7 +142,7 @@ QUERY;
         ]);
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   `foo` INT NOT NULL AUTO_INCREMENT,
@@ -163,7 +165,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `foo_bar_unique` UNIQUE (`foo`, `bar`)
@@ -184,7 +186,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `foo_bar_pk` PRIMARY KEY (`foo`, `bar`)
@@ -206,7 +208,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `foo_pk` PRIMARY KEY (`foo`),
@@ -231,7 +233,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`)
@@ -256,7 +258,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `test_fk` FOREIGN KEY (`foo`, `baz`) REFERENCES `other_table` (`bar`, `qux`)
@@ -278,7 +280,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE CASCADE
@@ -300,7 +302,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON DELETE SET NULL
@@ -323,7 +325,7 @@ QUERY;
         );
         $query = new CreateTableQuery(null, 'test_table', false, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE `test_table` (
   CONSTRAINT `test_fk` FOREIGN KEY (`foo`) REFERENCES `other_table` (`bar`) ON UPDATE SET DEFAULT ON DELETE CASCADE
@@ -340,7 +342,7 @@ QUERY;
         ]);
         $query = new CreateTableQuery(null, 'test_table', true, $schema);
 
-        $actual = $query->compile();
+        $actual = $query->toSql();
         $expected = <<<QUERY
 CREATE TABLE IF NOT EXISTS `test_table` (
   `foo` INT NULL
@@ -358,9 +360,9 @@ QUERY;
         $query = new CreateTableQuery(null, '', false, $schema);
 
         try {
-            $query->compile();
+            $query->toSql();
             TestCase::fail('Expected a QueryCompileException to be thrown');
-        } catch (QueryCompileException $exception) {
+        } catch (QuerySqlException $exception) {
             TestCase::assertSame(
                 $query,
                 $exception->getQuery(),

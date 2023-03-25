@@ -3,11 +3,12 @@
 namespace RebelCode\Atlas\Query;
 
 use DomainException;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Query;
 use Throwable;
 
+/** @psalm-immutable */
 class DropTableQuery extends Query
 {
     protected string $table;
@@ -18,18 +19,18 @@ class DropTableQuery extends Query
      * Constructor.
      *
      * @param DatabaseAdapter|null $adapter The database adapter to execute the query with.
-     * @param string $table The name of the table to drop.
+     * @param string $from The name of the table to drop.
      * @param bool $ifExists Whether to only drop the table if it exists.
      * @param bool $cascade Whether to cascade the drop.
      */
     public function __construct(
         ?DatabaseAdapter $adapter,
-        string $table,
+        string $from,
         bool $ifExists = false,
         bool $cascade = false
     ) {
         parent::__construct($adapter);
-        $this->table = $table;
+        $this->table = $from;
         $this->ifExists = $ifExists;
         $this->cascade = $cascade;
     }
@@ -38,7 +39,7 @@ class DropTableQuery extends Query
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
             $table = trim($this->table);
@@ -59,7 +60,7 @@ class DropTableQuery extends Query
 
             return $result;
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile DROP TABLE query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile DROP TABLE query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -70,6 +71,6 @@ class DropTableQuery extends Query
      */
     public function exec(): bool
     {
-        return $this->getAdapter()->query($this->compile());
+        return $this->getAdapter()->query($this->toSql());
     }
 }

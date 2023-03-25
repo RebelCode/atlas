@@ -3,15 +3,17 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Order;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\UpdateQuery;
-use RebelCode\Atlas\Test\Helpers;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class UpdateQueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testIsQuery()
     {
         $this->assertInstanceOf(Query::class, new UpdateQuery());
@@ -21,18 +23,19 @@ class UpdateQueryTest extends TestCase
     {
         $adapter = $this->createMock(DatabaseAdapter::class);
         $table = 'foo';
-        $set = ['name' => 'Alice'];
+        $assign = ['name' => 'Alice'];
         $where = $this->createMock(ExprInterface::class);
         $order = [Order::by('foo')];
         $limit = 123;
 
-        $query = new UpdateQuery($adapter, $table, $set, $where, $order, $limit);
+        $query = new UpdateQuery($adapter, $table, $assign, $where, $order, $limit);
+        $query = $this->expose($query);
 
-        $this->assertSame($table, Helpers::property($query, 'table'));
-        $this->assertSame($set, Helpers::property($query, 'set'));
-        $this->assertSame($where, Helpers::property($query, 'where'));
-        $this->assertSame($order, Helpers::property($query, 'order'));
-        $this->assertSame($limit, Helpers::property($query, 'limit'));
+        $this->assertSame($table, $query->table);
+        $this->assertSame($assign, $query->assign);
+        $this->assertSame($where, $query->where);
+        $this->assertSame($order, $query->order);
+        $this->assertSame($limit, $query->limit);
     }
 
     public function testTable()
@@ -41,16 +44,16 @@ class UpdateQueryTest extends TestCase
         $new = $query->table($table = 'foo');
 
         $this->assertNotSame($query, $new);
-        $this->assertSame($table, Helpers::property($new, 'table'));
+        $this->assertSame($table, $this->expose($new)->table);
     }
 
     public function testSet()
     {
         $query = new UpdateQuery();
-        $new = $query->set($set = ['name' => 'Alice']);
+        $new = $query->set($assign = ['name' => 'Alice']);
 
         $this->assertNotSame($query, $new);
-        $this->assertSame($set, Helpers::property($new, 'set'));
+        $this->assertSame($assign, $this->expose($new)->assign);
     }
 
     public function testWhere()
@@ -59,7 +62,7 @@ class UpdateQueryTest extends TestCase
         $new = $query->where($where = $this->createMock(ExprInterface::class));
 
         $this->assertNotSame($query, $new);
-        $this->assertSame($where, Helpers::property($new, 'where'));
+        $this->assertSame($where, $this->expose($new)->where);
     }
 
     public function testOrder()
@@ -68,7 +71,7 @@ class UpdateQueryTest extends TestCase
         $new = $query->orderBy($order = [Order::by('foo')]);
 
         $this->assertNotSame($query, $new);
-        $this->assertSame($order, Helpers::property($new, 'order'));
+        $this->assertSame($order, $this->expose($new)->order);
     }
 
     public function testExec()

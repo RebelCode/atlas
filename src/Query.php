@@ -4,8 +4,9 @@ namespace RebelCode\Atlas;
 
 use LogicException;
 use RebelCode\Atlas\Exception\DatabaseException;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 
+/** @psalm-immutable */
 abstract class Query
 {
     protected ?DatabaseAdapter $adapter;
@@ -36,13 +37,13 @@ abstract class Query
     }
 
     /**
-     * Compiles the query into a SQL string.
+     * Compiles the query into an SQL string.
      *
      * @psalm-mutation-free
-     * @return string The SQL string.
-     * @throws QueryCompileException If an error occurred while compiling the query.
+     * @return string The compiled SQL string.
+     * @throws QuerySqlException If an error occurred while compiling the SQL.
      */
-    abstract public function compile(): string;
+    abstract public function toSql(): string;
 
     /**
      * Executes the query.
@@ -51,14 +52,4 @@ abstract class Query
      * @throws DatabaseException If an error occurred while executing the query.
      */
     abstract public function exec();
-
-    /**
-     * Casts the query to a string by compiling it into SQL.
-     *
-     * @return string The SQL string.
-     */
-    public function __toString(): string
-    {
-        return $this->compile();
-    }
 }

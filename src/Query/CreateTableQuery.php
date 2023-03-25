@@ -3,14 +3,15 @@
 namespace RebelCode\Atlas\Query;
 
 use DomainException;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Schema\ForeignKey;
 use Throwable;
 use UnexpectedValueException;
 
+/** @psalm-immutable */
 class CreateTableQuery extends Query
 {
     protected string $name;
@@ -45,7 +46,7 @@ class CreateTableQuery extends Query
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
             $name = trim($this->name);
@@ -68,7 +69,7 @@ class CreateTableQuery extends Query
 
             return $result;
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile CREATE TABLE query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile CREATE TABLE query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -89,7 +90,7 @@ class CreateTableQuery extends Query
 
             $defaultVal = $column->getDefaultValue();
             if ($defaultVal !== null) {
-                $parts[] = "DEFAULT $defaultVal";
+                $parts[] = "DEFAULT " . $defaultVal->toSql();
             } else {
                 $parts[] = $column->getIsNullable() ? 'NULL' : 'NOT NULL';
             }
@@ -142,6 +143,6 @@ class CreateTableQuery extends Query
      */
     public function exec(): bool
     {
-        return $this->getAdapter()->query($this->compile());
+        return $this->getAdapter()->query($this->toSql());
     }
 }

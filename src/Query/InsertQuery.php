@@ -3,25 +3,24 @@
 namespace RebelCode\Atlas\Query;
 
 use DomainException;
-use InvalidArgumentException;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\QueryCompiler;
+use RebelCode\Atlas\Query;
 use Throwable;
-use UnexpectedValueException;
 
+/** @psalm-immutable */
 class InsertQuery extends Query
 {
-    /** @var string */
-    protected $into;
+    use Query\Traits\HasAssignmentTrait {
+        assign as onDuplicateKey;
+    }
+
+    protected string $into;
     /** @var string[] */
-    protected $columns;
-    /** @var array<string,mixed>[] */
-    protected $values;
-    /** @var array<string, mixed> */
-    protected $assignList;
+    protected array $columns;
+    /** @var list<array<string,mixed>> */
+    protected array $values;
 
     /**
      * Constructor.
@@ -30,20 +29,20 @@ class InsertQuery extends Query
      * @param string $into The table to insert into.
      * @param string[] $columns The columns to insert into.
      * @param array<string,mixed>[] $values A list of associative arrays, each representing a row to be inserted.
-     * @param array<string, mixed> $assignList Optional assignment list to use in the "ON DUPLICATE KEY" clause.
+     * @param array<string, mixed> $assign Optional assignment list to use in the "ON DUPLICATE KEY" clause.
      */
     public function __construct(
         ?DatabaseAdapter $adapter = null,
         string $into = '',
         array $columns = [],
         array $values = [],
-        array $assignList = []
+        array $assign = []
     ) {
         parent::__construct($adapter);
         $this->into = $into;
         $this->columns = $columns;
         $this->values = $values;
-        $this->assignList = $assignList;
+        $this->assign = $assign;
     }
 
     /**
@@ -89,24 +88,10 @@ class InsertQuery extends Query
     }
 
     /**
-     * Creates a copy with a new assignment list to use in the "ON DUPLICATE KEY" clause.
-     *
-     * @psalm-mutation-free
-     * @param array<string, mixed> $assignList The assignment list, as a map of column names to values.
-     * @return self The new instance.
-     */
-    public function onDuplicateKey(array $assignList): self
-    {
-        $new = clone $this;
-        $new->assignList = $assignList;
-        return $new;
-    }
-
-    /**
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
             $table = trim($this->into);
@@ -114,23 +99,22 @@ class InsertQuery extends Query
                 throw new DomainException('Table name is missing');
             }
 
-            $columnsStr = QueryCompiler::compileColumnList($this->columns);
-            if (empty($columnsStr)) {
-                throw new UnexpectedValueException('Column list cannot be empty');
-            }
+            $columnsStr = count($this->columns) > 0
+                ? '`' . implode('`, `', $this->columns) . '`'
+                : '';
 
-            $numColumns = count($this->columns);
-            $valuesStr = self::compileInsertValues($this->values, $numColumns);
+            $valuesStr = $this->compileInsertValues();
+            $onDupeKey = $this->compileAssignment('UPDATE');
 
-            $result = "INSERT INTO `$table` ({$columnsStr}) VALUES {$valuesStr}";
+            $result = "INSERT INTO `$table` ($columnsStr) VALUES $valuesStr";
 
-            if (!empty($this->assignList)) {
-                $result .= ' ON DUPLICATE KEY ' . QueryCompiler::compileAssignmentList('UPDATE', $this->assignList);
+            if (!empty($onDupeKey)) {
+                $result .= ' ON DUPLICATE KEY ' . $onDupeKey;
             }
 
             return $result;
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile INSERT query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile INSERT query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -138,40 +122,21 @@ class InsertQuery extends Query
      * Compiles the VALUES fragment of the INSERT query.
      *
      * @psalm-mutation-free
-     *
-     * @param mixed $values A list of records, where each record is a list that contains the record's values.
-     * @param int $numColumns The number of columns that the records should have.
      * @return string
      */
-    protected static function compileInsertValues($values, int $numColumns): string
+    protected function compileInsertValues(): string
     {
-        /** @var array<array<string,mixed>> $values */
-        if (empty($values) || !is_array($values)) {
-            throw new InvalidArgumentException('VALUES list is empty or not an array');
-        }
-
-        $valuesList = [];
-        foreach ($values as $i => $record) {
-            if (empty($record) || !is_array($record)) {
-                throw new DomainException("Value set #$i is not an array or is empty");
-            } else {
-                $numValues = count($record);
-                if ($numValues !== $numColumns) {
-                    throw new DomainException(
-                        "Value set #$i has $numValues values, should have $numColumns"
-                    );
-                } else {
-                    $recordValues = [];
-                    foreach ($record as $value) {
-                        $recordValues[] = Term::create($value)->toString();
-                    }
-
-                    $valuesList[] = '(' . implode(', ', $recordValues) . ')';
-                }
+        $values = [];
+        foreach ($this->values as $record) {
+            $row = [];
+            foreach ($record as $value) {
+                $row[] = Term::create($value)->toSql();
             }
+
+            $values[] = '(' . implode(', ', $row) . ')';
         }
 
-        return implode(', ', $valuesList);
+        return implode(', ', $values);
     }
 
     /**
@@ -182,7 +147,7 @@ class InsertQuery extends Query
     public function exec(): ?int
     {
         $adapter = $this->getAdapter();
-        $numRows = $adapter->queryNumRows($this->compile());
+        $numRows = $adapter->queryNumRows($this->toSql());
 
         if ($numRows > 0) {
             return $adapter->getInsertId();

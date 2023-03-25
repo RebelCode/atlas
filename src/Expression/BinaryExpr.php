@@ -2,8 +2,6 @@
 
 namespace RebelCode\Atlas\Expression;
 
-use DomainException;
-
 /** @psalm-immutable */
 class BinaryExpr extends BaseExpr
 {
@@ -19,8 +17,6 @@ class BinaryExpr extends BaseExpr
     const NOT_IN = 'NOT IN';
     const LIKE = 'LIKE';
     const NOT_LIKE = 'NOT LIKE';
-    const BETWEEN = 'BETWEEN';
-    const NOT_BETWEEN = 'NOT BETWEEN';
     const REGEXP = 'REGEXP';
     const NOT_REGEXP = 'NOT REGEXP';
     const PLUS = '+';
@@ -41,7 +37,13 @@ class BinaryExpr extends BaseExpr
     protected string $operator;
     protected ExprInterface $right;
 
-    /** Constructor */
+    /**
+     * Constructor
+     *
+     * @param ExprInterface $left The left operand.
+     * @param string $operator The operator.
+     * @param ExprInterface $right The right operand.
+     */
     public function __construct(ExprInterface $left, string $operator, ExprInterface $right)
     {
         $this->left = $left;
@@ -49,38 +51,30 @@ class BinaryExpr extends BaseExpr
         $this->right = $right;
     }
 
+    /** Retrieves the left operand. */
     public function getLeft(): ExprInterface
     {
         return $this->left;
     }
 
+    /** Retrieves the operator. */
     public function getOperator(): string
     {
         return $this->operator;
     }
 
+    /** Retrieves the right operand. */
     public function getRight(): ExprInterface
     {
         return $this->right;
     }
 
-    public function toString(): string
+    /** @inheritDoc */
+    protected function toBaseString(): string
     {
-        $left = $this->left->toString();
+        $left = $this->left->toSql();
+        $right = $this->right->toSql();
 
-        if ($this->operator === self::BETWEEN || $this->operator === self::NOT_BETWEEN) {
-            if (!$this->right instanceof Term || !is_array($value = $this->right->getValue())) {
-                throw new DomainException('Right operand of ' . $this->operator . ' expression is not an array term');
-            }
-
-            $between1 = $value[0]->toString();
-            $between2 = $value[1]->toString();
-
-            return "($left $this->operator $between1 AND $between2)";
-        } else {
-            $right = $this->right->toString();
-
-            return "($left $this->operator $right)";
-        }
+        return "($left $this->operator $right)";
     }
 }

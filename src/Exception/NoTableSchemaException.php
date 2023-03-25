@@ -8,8 +8,7 @@ use Throwable;
 
 class NoTableSchemaException extends RuntimeException
 {
-    /** @var Table|null */
-    protected $table;
+    protected ?Table $table;
 
     public function __construct(string $message = "", ?Table $table = null, Throwable $previous = null)
     {

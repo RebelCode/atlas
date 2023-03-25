@@ -3,13 +3,14 @@
 namespace RebelCode\Atlas\Exception;
 
 use RebelCode\Atlas\Query;
-use RuntimeException;
 use Throwable;
 
-class QueryCompileException extends RuntimeException
+/**
+ * Exception thrown when a query fails to compile to SQL.
+ */
+class QuerySqlException extends SqlCompileException
 {
-    /** @var Query */
-    protected $query;
+    protected Query $query;
 
     /**
      * Constructor.
@@ -20,7 +21,7 @@ class QueryCompileException extends RuntimeException
      */
     public function __construct(string $message, Query $query, ?Throwable $previous = null)
     {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, $previous);
         $this->query = $query;
     }
 

@@ -28,14 +28,20 @@ class UnaryExpr extends BaseExpr
         return $this->operand;
     }
 
-    public function toString(): string
+    protected function toBaseString(): string
     {
-        $term = $this->operand->toString();
+        $term = $this->operand->toSql();
 
         $isColumn = ($this->operand instanceof Term && $this->operand->getType() === Term::COLUMN);
         $isDistinct = $isColumn && $this->operand->isDistinct();
         $distinct = $isDistinct ? 'DISTINCT ' : '';
 
-        return "$this->operator($distinct$term)";
+        $result = "$this->operator($distinct$term)";
+
+        if ($this->alias !== null) {
+            $result .= " AS `$this->alias`";
+        }
+
+        return $result;
     }
 }

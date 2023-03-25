@@ -4,9 +4,9 @@ namespace RebelCode\Atlas\Test\Expression;
 
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Expression\BaseExpr;
+use RebelCode\Atlas\Expression\BetweenExpr;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ExprInterface;
-use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 
 class BaseExprTest extends TestCase
@@ -36,8 +36,8 @@ class BaseExprTest extends TestCase
             'notIn' => ['notIn', BinaryExpr::NOT_IN],
             'like' => ['like', BinaryExpr::LIKE],
             'notLike' => ['notLike', BinaryExpr::NOT_LIKE],
-            'regx' => ['regx', BinaryExpr::REGEXP],
-            'notRegx' => ['notRegx', BinaryExpr::NOT_REGEXP],
+            'regex' => ['regex', BinaryExpr::REGEXP],
+            'notRegex' => ['notRegex', BinaryExpr::NOT_REGEXP],
             'plus' => ['plus', BinaryExpr::PLUS],
             'minus' => ['minus', BinaryExpr::MINUS],
             'mult' => ['mult', BinaryExpr::MULT],
@@ -71,29 +71,30 @@ class BaseExprTest extends TestCase
     public function provideBetweenExprData(): array
     {
         return [
-            'between' => ['betw', BinaryExpr::BETWEEN],
-            'not between' => ['notBetw', BinaryExpr::NOT_BETWEEN],
+            'between' => ['between', false],
+            'not between' => ['notBetween', true],
         ];
     }
 
     /** @dataProvider provideBetweenExprData */
-    public function testBetweenExpr($method, $operator)
+    public function testBetweenExpr($method, $not)
     {
         $subject = $this->getMockBuilder(BaseExpr::class)
                         ->enableProxyingToOriginalMethods()
+                        ->onlyMethods(['toBaseString'])
                         ->getMockForAbstractClass();
+
+        $subject->method('toBaseString')->willReturn('');
 
         $term1 = $this->createMock(ExprInterface::class);
         $term2 = $this->createMock(ExprInterface::class);
         $result = call_user_func_array([$subject, $method], [$term1, $term2]);
 
-        $right = $result->getRight();
-
-        $this->assertInstanceOf(BinaryExpr::class, $result, 'Result is not a binary expression instance');
+        $this->assertInstanceOf(BetweenExpr::class, $result, 'Result is not a between expression instance');
         $this->assertSame($subject, $result->getLeft(), 'The left operand is not the subject');
-        $this->assertInstanceOf(Term::class, $right, 'The right operand is not a term');
-        $this->assertEquals([$term1, $term2], $right->getValue(), 'The right operand is not an array of the arguments');
-        $this->assertEquals($operator, $result->getOperator(), 'The operator is incorrect');
+        $this->assertSame($term1, $result->getLow(), 'The low operand is not the expected term');
+        $this->assertSame($term2, $result->getHigh(), 'The high operand is not the expected term');
+        $this->assertEquals($not, $result->isNegated(), 'The negation flag is incorrect');
     }
 
     public function provideUnaryExprData(): array
@@ -117,13 +118,5 @@ class BaseExprTest extends TestCase
         $this->assertInstanceOf(UnaryExpr::class, $result, 'Result is not a unary expression instance');
         $this->assertSame($subject, $result->getOperand(), 'The operand is not the subject');
         $this->assertEquals($operator, $result->getOperator(), 'The operator is incorrect');
-    }
-
-    public function testCastString()
-    {
-        $term = $this->createPartialMock(BaseExpr::class, ['toString']);
-        $term->expects($this->once())->method('toString')->willReturn('69');
-
-        $this->assertIsString((string) $term);
     }
 }

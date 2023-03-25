@@ -4,12 +4,13 @@ namespace RebelCode\Atlas\Query;
 
 use DomainException;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Schema\Index;
 use Throwable;
 
+/** @psalm-immutable */
 class CreateIndexQuery extends Query
 {
     protected string $table;
@@ -20,18 +21,18 @@ class CreateIndexQuery extends Query
      * Constructor.
      *
      * @param DatabaseAdapter|null $adapter The database adapter to execute the query.
-     * @param string $table The name of the table to create the index on.
+     * @param string $from The name of the table to create the index on.
      * @param string $name The name of the index to create.
      * @param Index $index The index to create.
      */
     public function __construct(
         ?DatabaseAdapter $adapter,
-        string $table,
+        string $from,
         string $name,
         Index $index
     ) {
         parent::__construct($adapter);
-        $this->table = $table;
+        $this->table = $from;
         $this->name = $name;
         $this->index = $index;
     }
@@ -40,7 +41,7 @@ class CreateIndexQuery extends Query
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
             $table = trim($this->table);
@@ -69,7 +70,7 @@ class CreateIndexQuery extends Query
 
             return "$command `$name` ON `$table` ($columnStr)";
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile CREATE INDEX query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile CREATE INDEX query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -80,6 +81,6 @@ class CreateIndexQuery extends Query
      */
     public function exec(): bool
     {
-        return $this->getAdapter()->query($this->compile());
+        return $this->getAdapter()->query($this->toSql());
     }
 }

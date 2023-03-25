@@ -21,7 +21,10 @@
     "psr-4": {
       "RebelCode\\Atlas\\": "src/"
     },
-    "files": ["inc/functions.php"]
+    "files": [
+      "inc/functions.php",
+      "inc/constants.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

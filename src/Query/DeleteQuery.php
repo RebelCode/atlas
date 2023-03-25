@@ -2,26 +2,22 @@
 
 namespace RebelCode\Atlas\Query;
 
-use DomainException;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Exception\DatabaseException;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Order;
-use RebelCode\Atlas\QueryCompiler;
+use RebelCode\Atlas\Query;
 use Throwable;
 
+/** @psalm-immutable */
 class DeleteQuery extends Query
 {
-    /** @var string */
-    protected $from;
-    /** @var ExprInterface|null */
-    protected $where;
-    /** @var Order[] */
-    protected $order;
-    /** @var int|null */
-    protected $limit;
+    use Query\Traits\HasWhereTrait;
+    use Query\Traits\HasOrderTrait;
+    use Query\Traits\HasLimitTrait;
+
+    protected string $from;
 
     /**
      * Constructor.
@@ -33,8 +29,8 @@ class DeleteQuery extends Query
      * @param int|null $limit The limit, or null for no limit.
      */
     public function __construct(
-        ?DatabaseAdapter $adapter = null,
-        string $from = '',
+        ?DatabaseAdapter $adapter,
+        string $from,
         ?ExprInterface $where = null,
         array $order = [],
         ?int $limit = null
@@ -47,87 +43,39 @@ class DeleteQuery extends Query
     }
 
     /**
-     * Creates a copy with a different table name.
+     * Creates a copy with a different FROM clause.
      *
      * @psalm-mutation-free
-     * @param string $table The new name of the table to delete from.
+     * @param string $from The table name.
      * @return static The new instance.
      */
-    public function from(string $table): self
+    public function from(string $from): self
     {
-        $new = clone $this;
-        $new->from = $table;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a different limit.
-     *
-     * @psalm-mutation-free
-     * @param ExprInterface|null $expr The new WHERE expression.
-     * @return static The new instance.
-     */
-    public function where(?ExprInterface $expr): self
-    {
-        $new = clone $this;
-        $new->where = $expr;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a different limit.
-     *
-     * @psalm-mutation-free
-     * @param Order[] $order The new list of columns to ORDER BY.
-     * @return static The new instance.
-     */
-    public function orderBy(array $order): self
-    {
-        $new = clone $this;
-        $new->order = $order;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a different limit.
-     *
-     * @psalm-mutation-free
-     * @param int|null $limit The new LIMIT expression, or null for no limit.
-     * @return static The new instance.
-     */
-    public function limit(?int $limit): self
-    {
-        $new = clone $this;
-        $new->limit = $limit;
-        return $new;
+        $clone = clone $this;
+        $clone->from = $from;
+        return $clone;
     }
 
     /**
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
-            $table = trim($this->from);
-            if (empty($table)) {
-                throw new DomainException('Table name is missing');
-            }
-
-            $where = QueryCompiler::compileWhere($this->where);
+            $where = $this->compileWhere();
             $hasWhere = !empty($where);
 
             $result = [
-                'DELETE',
-                QueryCompiler::compileFrom($table),
+                'DELETE FROM `' . $this->from . '`',
                 $where,
-                $hasWhere ? QueryCompiler::compileOrder($this->order) : null,
-                QueryCompiler::compileLimit($this->limit),
+                $hasWhere ? $this->compileOrder() : '',
+                $this->compileLimit(),
             ];
 
             return implode(' ', array_filter($result));
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile DELETE query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile DELETE query - ' . $e->getMessage(), $this, $e);
         }
     }
 
@@ -139,6 +87,6 @@ class DeleteQuery extends Query
      */
     public function exec(): int
     {
-        return $this->getAdapter()->queryNumRows($this->compile());
+        return $this->getAdapter()->queryNumRows($this->toSql());
     }
 }

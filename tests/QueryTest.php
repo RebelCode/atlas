@@ -6,17 +6,20 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Query;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 use Throwable;
 
 class QueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testCtorNoArgs()
     {
         $subject = $this->getMockBuilder(Query::class)
                         ->setConstructorArgs([])
                         ->getMockForAbstractClass();
 
-        $this->assertNull(Helpers::property($subject, 'adapter'));
+        $this->assertNull($this->expose($subject)->adapter);
     }
 
     public function testCtorWithAdapter()
@@ -47,19 +50,5 @@ class QueryTest extends TestCase
         } catch (Throwable $e) {
             $this->assertInstanceOf(LogicException::class, $e);
         }
-    }
-
-    public function testToString()
-    {
-        $expected = 'SELECT * FROM `foo`';
-
-        $subject = $this->getMockBuilder(Query::class)
-                        ->enableProxyingToOriginalMethods()
-                        ->onlyMethods(['compile'])
-                        ->getMockForAbstractClass();
-
-        $subject->expects($this->once())->method('compile')->willReturn($expected);
-
-        $this->assertEquals($expected, (string) $subject);
     }
 }

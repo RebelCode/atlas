@@ -2,66 +2,55 @@
 
 namespace RebelCode\Atlas\Query;
 
-use DomainException;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\DataSource;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
-use RebelCode\Atlas\QueryCompiler;
+use RebelCode\Atlas\Query;
 use Throwable;
 
-class SelectQuery extends Query
+/** @psalm-immutable */
+class SelectQuery extends Query implements DataSource
 {
-    /** @var string|SelectQuery */
-    protected $from;
+    use Query\Traits\HasSelectColumnListTrait;
+    use Query\Traits\HasJoinsTrait;
+    use Query\Traits\HasWhereTrait;
+    use Query\Traits\HasGroupByTrait;
+    use Query\Traits\HasHavingTrait;
+    use Query\Traits\HasOrderTrait;
+    use Query\Traits\HasLimitTrait;
+    use Query\Traits\HasOffsetTrait;
+
+    protected ?DataSource $source = null;
+    protected ?string $alias = null;
     /** @var array<string|Term> */
-    protected $columns;
-    /** @var ExprInterface|null */
-    protected $where;
-    /** @var Group[] */
-    protected $group;
-    /** @var ExprInterface|null */
-    protected $having;
-    /** @var int|null */
-    protected $limit;
-    /** @var int|null */
-    protected $offset;
-    /** @var Order[] */
-    protected $order;
+    protected array $columns = [];
 
     /**
      * Constructor.
      *
      * @param DatabaseAdapter|null $adapter Optional database adapter to execute the query.
-     * @param string|SelectQuery $from The table to select from.
-     * @param array<string|Term> $columns The columns to select.
+     * @param DataSource $from The data source to select from.
      * @param ExprInterface|null $where The WHERE condition.
-     * @param Group[] $group The GROUP BY clause.
-     * @param ExprInterface|null $having The HAVING condition.
      * @param Order[] $order The ORDER BY clause.
      * @param int|null $limit The LIMIT clause.
      * @param int|null $offset The OFFSET clause.
      */
     public function __construct(
-        ?DatabaseAdapter $adapter = null,
-        $from = '',
+        ?DatabaseAdapter $adapter,
+        DataSource $from,
         array $columns = [],
         ?ExprInterface $where = null,
-        array $group = [],
-        ?ExprInterface $having = null,
         array $order = [],
         ?int $limit = null,
         ?int $offset = null
     ) {
         parent::__construct($adapter);
-        $this->from = $from;
+        $this->source = $from;
         $this->columns = $columns;
         $this->where = $where;
-        $this->group = $group;
-        $this->having = $having;
         $this->limit = $limit;
         $this->offset = $offset;
         $this->order = $order;
@@ -71,13 +60,13 @@ class SelectQuery extends Query
      * Creates a copy with a different FROM clause.
      *
      * @psalm-immutable
-     * @param string|SelectQuery $from The new FROM clause.
+     * @param DataSource $source The source for the FROM clause.
      * @return static The new instance.
      */
-    public function from($from): self
+    public function from(DataSource $source): self
     {
         $new = clone $this;
-        $new->from = $from;
+        $new->source = $source;
         return $new;
     }
 
@@ -95,120 +84,87 @@ class SelectQuery extends Query
         return $new;
     }
 
-    /**
-     * Creates a copy with a new WHERE condition.
-     *
-     * @psalm-immutable
-     * @param ExprInterface|null $where The new WHERE condition.
-     * @return static The new instance.
-     */
-    public function where(?ExprInterface $expr): self
+    /** @inheritdoc */
+    public function as(?string $alias): DataSource
     {
-        $new = clone $this;
-        $new->where = $expr;
-        return $new;
+        $clone = clone $this;
+        $clone->alias = $alias;
+        return $clone;
     }
 
-    /**
-     * Creates a copy with a new GROUP BY clause.
-     *
-     * @psalm-immutable
-     * @param Group[] $groupBy An array of {@link Group} instances.
-     * @return static The new instance.
-     */
-    public function groupBy(array $groupBy): self
+    /** @inheritdoc */
+    public function getAlias(): ?string
     {
-        $new = clone $this;
-        $new->group = $groupBy;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a new HAVING condition.
-     *
-     * @psalm-immutable
-     * @param ExprInterface|null $having The new HAVING condition.
-     * @return static The new instance.
-     */
-    public function having(?ExprInterface $expr): self
-    {
-        $new = clone $this;
-        $new->having = $expr;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with new ordering.
-     *
-     * @psalm-immutable
-     * @param Order[] $order A list of {@link Order} instances.
-     * @return static The new instance.
-     */
-    public function orderBy(array $order): self
-    {
-        $new = clone $this;
-        $new->order = $order;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a new selection limit.
-     *
-     * @psalm-immutable
-     * @param int|null $limit The new selection limit, or null for no limit.
-     * @return static The new instance.
-     */
-    public function limit(?int $limit): self
-    {
-        $new = clone $this;
-        $new->limit = $limit;
-        return $new;
-    }
-
-    /**
-     * Creates a copy with a new selection offset.
-     *
-     * @psalm-immutable
-     * @param int|null $offset The new selection offset, or null or zero for no offset.
-     * @return static The new instance.
-     */
-    public function offset(?int $offset): self
-    {
-        $new = clone $this;
-        $new->offset = $offset;
-        return $new;
+        return $this->alias;
     }
 
     /**
      * @inheritDoc
      * @psalm-mutation-free
      */
-    public function compile(): string
+    public function toSql(): string
     {
         try {
-            $fromStr = QueryCompiler::compileFrom($this->from, null, true);
-            if (empty($fromStr)) {
-                throw new DomainException('The query source is missing or is invalid');
-            }
-
-            $columns = count($this->columns) > 0 ? $this->columns : ['*'];
+            $from = ($this->source !== null)
+                ? 'FROM ' . $this->source->compileSource()
+                : '';
 
             $result = [
-                'SELECT',
-                QueryCompiler::compileColumnList($columns, true),
-                QueryCompiler::compileFrom($this->from, null, true),
-                QueryCompiler::compileWhere($this->where),
-                QueryCompiler::compileGroupBy($this->group),
-                QueryCompiler::compileHaving($this->having),
-                QueryCompiler::compileOrder($this->order),
-                QueryCompiler::compileLimit($this->limit),
-                QueryCompiler::compileOffset($this->offset),
+                'SELECT ' . $this->compileColumnList(),
+                $from,
+                $this->compileJoins(),
+                $this->compileWhere(),
+                $this->compileGroupBy(),
+                $this->compileHaving(),
+                $this->compileOrder(),
+                $this->compileLimit(),
+                $this->compileOffset(),
             ];
 
             return implode(' ', array_filter($result));
         } catch (Throwable $e) {
-            throw new QueryCompileException('Cannot compile SELECT query - ' . $e->getMessage(), $this, $e);
+            throw new QuerySqlException('Cannot compile SELECT query - ' . $e->getMessage(), $this, $e);
         }
+    }
+
+    /**
+     * Compiles the list of columns.
+     *
+     * @psalm-mutation-free
+     * @return string
+     */
+    protected function compileColumnList(): string
+    {
+        if (empty($this->columns)) {
+            return '*';
+        }
+
+        $list = [];
+        foreach ($this->columns as $key => $value) {
+            if ($value === '*') {
+                $list[] = '*';
+            } else {
+                $expr = ($value instanceof ExprInterface)
+                    ? $value
+                    : new Term(Term::COLUMN, $value);
+
+                $list[] = $expr->toSql() . (is_numeric($key) ? '' : " AS `$key`");
+            }
+        }
+
+        return implode(', ', $list);
+    }
+
+    /** @inheritDoc */
+    public function compileSource(): string
+    {
+        $result = '(' . $this->toSql() . ')';
+
+        if ($this->alias !== null) {
+            $result .= " AS {$this->alias}";
+        }
+
+        return $result;
     }
 
     /**
@@ -218,6 +174,6 @@ class SelectQuery extends Query
      */
     public function exec(): array
     {
-        return $this->getAdapter()->queryResults($this->compile());
+        return $this->getAdapter()->queryResults($this->toSql());
     }
 }

@@ -3,15 +3,17 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\InsertQuery;
-use RebelCode\Atlas\Test\Helpers;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class InsertQueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testIsQuery()
     {
         $this->assertInstanceOf(Query::class, new InsertQuery());
@@ -27,10 +29,10 @@ class InsertQueryTest extends TestCase
 
         $query = new InsertQuery($adapter, $into, $columns, $values, $onDuplicate);
 
-        $this->assertEquals($into, Helpers::property($query, 'into'));
-        $this->assertEquals($columns, Helpers::property($query, 'columns'));
-        $this->assertEquals($values, Helpers::property($query, 'values'));
-        $this->assertEquals($onDuplicate, Helpers::property($query, 'assignList'));
+        $this->assertEquals($into, $this->expose($query)->into);
+        $this->assertEquals($columns, $this->expose($query)->columns);
+        $this->assertEquals($values, $this->expose($query)->values);
+        $this->assertEquals($onDuplicate, $this->expose($query)->assign);
     }
 
     public function testInto()
@@ -39,7 +41,7 @@ class InsertQueryTest extends TestCase
         $new = $query->into($table = 'foo');
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($table, Helpers::property($new, 'into'));
+        $this->assertEquals($table, $this->expose($new)->into);
     }
 
     public function testColumns()
@@ -48,7 +50,7 @@ class InsertQueryTest extends TestCase
         $new = $query->columns($columns = ['foo', 'bar']);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($columns, Helpers::property($new, 'columns'));
+        $this->assertEquals($columns, $this->expose($new)->columns);
     }
 
     public function testValues()
@@ -57,16 +59,16 @@ class InsertQueryTest extends TestCase
         $new = $query->values($values = [['foo' => 'bar'], ['baz' => 'qux']]);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($values, Helpers::property($new, 'values'));
+        $this->assertEquals($values, $this->expose($new)->values);
     }
 
     public function testOnDuplicate()
     {
         $query = new InsertQuery();
-        $new = $query->onDuplicateKey($assignList = ['a' => 1, 'b' => 2]);
+        $new = $query->onDuplicateKey($assign = ['a' => 1, 'b' => 2]);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($assignList, Helpers::property($new, 'assignList'));
+        $this->assertEquals($assign, $this->expose($new)->assign);
     }
 
     public function provideExecNumRowsAffected()
@@ -96,7 +98,7 @@ class InsertQueryTest extends TestCase
 
         $expected = 'INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3)';
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileStrings()
@@ -105,7 +107,7 @@ class InsertQueryTest extends TestCase
 
         $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES ('hey', 'there', 'buddy')";
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileMultipleValues()
@@ -118,7 +120,7 @@ class InsertQueryTest extends TestCase
 
         $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3), ('hey', 'there', 'buddy'), (4, 5, 6)";
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileInvalidTableName()
@@ -126,45 +128,9 @@ class InsertQueryTest extends TestCase
         $query = new InsertQuery(null, '', ['a', 'b', 'c'], [[1, 2, 3]]);
 
         try {
-            $query->compile();
+            $query->toSql();
             $this->fail('Expected an exception to be thrown');
-        } catch (QueryCompileException $e) {
-            $this->assertSame($query, $e->getQuery(), "The exception's query is invalid");
-        }
-    }
-
-    public function testCompileInvalidColumns()
-    {
-        $query = new InsertQuery(null, 'foo', [], [[1, 2, 3]]);
-
-        try {
-            $query->compile();
-            $this->fail('Expected an exception to be thrown');
-        } catch (QueryCompileException $e) {
-            $this->assertSame($query, $e->getQuery(), "The exception's query is invalid");
-        }
-    }
-
-    public function provideValuesExceptionCases(): array
-    {
-        return [
-            [[]],
-            [[[]]],
-            [[[1, 2, 3], [], [4, 5, 6]]],
-            [[[1, 2, 3, 4]]], // more values than columns
-            [[[1, 2]]], // less values than columns
-        ];
-    }
-
-    /** @dataProvider provideValuesExceptionCases */
-    public function testCompileInvalidValues($values)
-    {
-        $query = new InsertQuery(null, 'foo', ['a', 'b', 'c'], $values);
-
-        try {
-            $query->compile();
-            $this->fail('Expected an exception to be thrown');
-        } catch (QueryCompileException $e) {
+        } catch (QuerySqlException $e) {
             $this->assertSame($query, $e->getQuery(), "The exception's query is invalid");
         }
     }
@@ -172,14 +138,14 @@ class InsertQueryTest extends TestCase
     public function testCompileOnDuplicateKey()
     {
         $bExpr = $this->createMock(ExprInterface::class);
-        $bExpr->expects($this->once())->method('toString')->willReturn('BBB');
+        $bExpr->expects($this->once())->method('toSql')->willReturn('BBB');
 
         $insert = new InsertQuery(null, 'foo', ['a', 'b', 'c'], [[1, 2, 3]], [
             'a' => 'A',
             'b' => $bExpr,
         ]);
 
-        $actual = $insert->compile();
+        $actual = $insert->toSql();
         $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3) ON DUPLICATE KEY UPDATE `a` = 'A', `b` = BBB";
 
         $this->assertEquals($expected, $actual);

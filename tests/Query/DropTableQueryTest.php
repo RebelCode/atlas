@@ -3,14 +3,16 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
+use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\DropTableQuery;
-use RebelCode\Atlas\Test\Helpers;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class DropTableQueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testIsQuery()
     {
         $this->assertInstanceOf(Query::class, new DropTableQuery(null, 'foo'));
@@ -24,10 +26,10 @@ class DropTableQueryTest extends TestCase
         $cascade = true;
         $query = new DropTableQuery($adapter, $table, $ifExists, $cascade);
 
-        $this->assertSame($adapter, Helpers::property($query, 'adapter'));
-        $this->assertSame($table, Helpers::property($query, 'table'));
-        $this->assertSame($ifExists, Helpers::property($query, 'ifExists'));
-        $this->assertSame($cascade, Helpers::property($query, 'cascade'));
+        $this->assertSame($adapter, $this->expose($query)->adapter);
+        $this->assertSame($table, $this->expose($query)->table);
+        $this->assertSame($ifExists, $this->expose($query)->ifExists);
+        $this->assertSame($cascade, $this->expose($query)->cascade);
     }
 
     public function testExec()
@@ -46,7 +48,7 @@ class DropTableQueryTest extends TestCase
 
         $expected = 'DROP TABLE `test`';
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileIfExists()
@@ -55,7 +57,7 @@ class DropTableQueryTest extends TestCase
 
         $expected = 'DROP TABLE IF EXISTS `test`';
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileCascade()
@@ -64,7 +66,7 @@ class DropTableQueryTest extends TestCase
 
         $expected = 'DROP TABLE `test` CASCADE';
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileIfExistsCascade()
@@ -73,7 +75,7 @@ class DropTableQueryTest extends TestCase
 
         $expected = 'DROP TABLE IF EXISTS `test` CASCADE';
 
-        $this->assertEquals($expected, $query->compile());
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testCompileInvalidTableName()
@@ -81,9 +83,9 @@ class DropTableQueryTest extends TestCase
         $query = new DropTableQuery(null, '');
 
         try {
-            $query->compile();
+            $query->toSql();
             $this->fail('Expected an exception to be thrown');
-        } catch (QueryCompileException $e) {
+        } catch (QuerySqlException $e) {
             $this->assertSame($query, $e->getQuery(), 'Exception query is invalid');
         }
     }

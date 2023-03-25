@@ -61,7 +61,7 @@ class Term extends BaseExpr
     }
 
     /** @psalm-suppress PossiblyInvalidCast */
-    public function toString(): string
+    protected function toBaseString(): string
     {
         switch ($this->type) {
             case self::NULL:
@@ -73,20 +73,13 @@ class Term extends BaseExpr
             case self::BOOLEAN:
                 return $this->value ? 'TRUE' : 'FALSE';
             case self::COLUMN:
-                $colParts = [];
-                foreach ((array) $this->value as $part) {
-                    /** @var string $part */
-                    $colParts = array_merge($colParts, explode('.', $part));
-                }
-
-                $col = implode('`.`', $colParts);
-                return "`$col`";
+                return '`' . implode('`.`', (array) $this->value) . '`';
             case self::LIST:
                 /** @psalm-var ExprInterface[] $elements */
                 $elements = $this->value;
 
                 $elementsStr = array_map(function (ExprInterface $element) {
-                    return $element->toString();
+                    return $element->toSql();
                 }, $elements);
 
                 return '(' . implode(', ', $elementsStr) . ')';
@@ -130,12 +123,14 @@ class Term extends BaseExpr
      *
      * @psalm-mutation-free
      *
-     * @param string|string[] $name The column name or an array of column qualifier segments.
+     * @param string $name The column name.
+     * @param string|null $alias Optional column alias.
      * @return self
      */
-    public static function column($name): self
+    public static function column(string $name, ?string $alias = null): self
     {
-        return new self(self::COLUMN, $name);
+        $value = ($alias === null) ? $name : [$name, $alias];
+        return new self(self::COLUMN, $value);
     }
 
     /**

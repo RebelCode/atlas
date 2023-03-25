@@ -28,7 +28,7 @@ class DatabaseException extends Exception
      *
      * @return DatabaseAdapter|null The database adapter, or null if none was set.
      */
-    public function getAdapter() : ?DatabaseAdapter
+    public function getAdapter(): ?DatabaseAdapter
     {
         return $this->adapter;
     }

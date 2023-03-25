@@ -74,39 +74,11 @@ class BinaryExprTest extends TestCase
         $left = $this->createMock(ExprInterface::class);
         $right = $this->createMock(ExprInterface::class);
 
-        $left->expects($this->once())->method('toString')->willReturn('foo');
-        $right->expects($this->once())->method('toString')->willReturn('bar');
+        $left->expects($this->once())->method('toSql')->willReturn('foo');
+        $right->expects($this->once())->method('toSql')->willReturn('bar');
 
         $expr = new BinaryExpr($left, $operator, $right);
 
-        $this->assertEquals("(foo $operator bar)", $expr->toString());
-    }
-
-    public function provideToStringBetweenData(): array
-    {
-        return [
-            'between' => [BinaryExpr::BETWEEN],
-            'not between' => [BinaryExpr::NOT_BETWEEN],
-        ];
-    }
-
-    /** @dataProvider provideToStringBetweenData */
-    public function testToStringBetween($operator)
-    {
-        $left = $this->createMock(ExprInterface::class);
-        $right = $this->createMock(Term::class);
-
-        $left->expects($this->once())->method('toString')->willReturn('foo');
-        $right->expects($this->once())->method('getValue')->willReturn([
-            $right1 = $this->createMock(Term::class),
-            $right2 = $this->createMock(Term::class),
-        ]);
-
-        $right1->expects($this->once())->method('toString')->willReturn('bar');
-        $right2->expects($this->once())->method('toString')->willReturn('baz');
-
-        $expr = new BinaryExpr($left, $operator, $right);
-
-        $this->assertEquals("(foo $operator bar AND baz)", $expr->toString());
+        $this->assertEquals("(foo $operator bar)", $expr->toSql());
     }
 }

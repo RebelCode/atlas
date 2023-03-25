@@ -2,11 +2,19 @@
 
 namespace RebelCode\Atlas\Expression;
 
-use Throwable;
-
 /** @psalm-immutable */
 abstract class BaseExpr implements ExprInterface
 {
+    protected ?string $alias = null;
+
+    /** @inheritDoc */
+    public function as(?string $alias): ExprInterface
+    {
+        $clone = clone $this;
+        $clone->alias = $alias;
+        return $clone;
+    }
+
     public function and($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::AND, Term::create($term));
@@ -82,22 +90,22 @@ abstract class BaseExpr implements ExprInterface
         return new BinaryExpr($this, BinaryExpr::NOT_LIKE, Term::create($term));
     }
 
-    public function betw($term1, $term2): BinaryExpr
+    public function between($term1, $term2): BetweenExpr
     {
-        return new BinaryExpr($this, BinaryExpr::BETWEEN, Term::create([$term1, $term2]));
+        return new BetweenExpr($this, Term::create($term1), Term::create($term2));
     }
 
-    public function notBetw($term1, $term2): BinaryExpr
+    public function notBetween($term1, $term2): BetweenExpr
     {
-        return new BinaryExpr($this, BinaryExpr::NOT_BETWEEN, Term::create([$term1, $term2]));
+        return new BetweenExpr($this, Term::create($term1), Term::create($term2), true);
     }
 
-    public function regx($term): BinaryExpr
+    public function regex($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::REGEXP, Term::create($term));
     }
 
-    public function notRegx($term): BinaryExpr
+    public function notRegex($term): BinaryExpr
     {
         return new BinaryExpr($this, BinaryExpr::NOT_REGEXP, Term::create($term));
     }
@@ -177,16 +185,16 @@ abstract class BaseExpr implements ExprInterface
         return new UnaryExpr($fn, $this);
     }
 
-    public function __toString(): string
+    /** Converts the expression into its equivalent SQL string. */
+    public function toSql(): string
     {
-        if (version_compare(PHP_VERSION, '7.4.0', '<')) {
-            try {
-                return $this->toString();
-            } catch (Throwable $throwable) {
-                return '';
-            }
-        } else {
-            return $this->toString();
-        }
+        $sql = $this->toBaseString();
+
+        return $this->alias === null
+            ? $sql
+            : "$sql AS `$this->alias`";
     }
+
+    /** Converts the expression into its equivalent SQL string, without the alias. */
+    abstract protected function toBaseString(): string;
 }

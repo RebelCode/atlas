@@ -3,20 +3,21 @@
 namespace RebelCode\Atlas\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
-use RebelCode\Atlas\Exception\QueryCompileException;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Order;
+use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\DeleteQuery;
-use RebelCode\Atlas\Test\Helpers;
-use Throwable;
+use RebelCode\Atlas\TableRef;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class DeleteQueryTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testIsQuery()
     {
-        $this->assertInstanceOf(Query::class, new DeleteQuery());
+        $this->assertInstanceOf(Query::class, new DeleteQuery(null, ''));
     }
 
     public function testCtor()
@@ -29,46 +30,47 @@ class DeleteQueryTest extends TestCase
 
         $query = new DeleteQuery($adapter, $from, $where, $order, $limit);
 
-        $this->assertEquals($from, Helpers::property($query, 'from'));
-        $this->assertEquals($where, Helpers::property($query, 'where'));
-        $this->assertEquals($order, Helpers::property($query, 'order'));
-        $this->assertEquals($limit, Helpers::property($query, 'limit'));
+        $this->assertEquals($from, $this->expose($query)->from);
+        $this->assertEquals($where, $this->expose($query)->where);
+        $this->assertEquals($order, $this->expose($query)->order);
+        $this->assertEquals($limit, $this->expose($query)->limit);
     }
 
     public function testFrom()
     {
-        $query = new DeleteQuery();
-        $new = $query->from($from = 'foo');
+        $from = 'foo';
+        $query = new DeleteQuery(null, '');
+        $new = $query->from($from);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($from, Helpers::property($new, 'from'));
+        $this->assertEquals($from, $this->expose($new)->from);
     }
 
     public function testWhere()
     {
-        $query = new DeleteQuery();
+        $query = new DeleteQuery(null, '');
         $new = $query->where($where = $this->createMock(ExprInterface::class));
 
         $this->assertNotSame($query, $new);
-        $this->assertSame($where, Helpers::property($new, 'where'));
+        $this->assertSame($where, $this->expose($new)->where);
     }
 
     public function testOrder()
     {
-        $query = new DeleteQuery();
+        $query = new DeleteQuery(null, '');
         $new = $query->orderBy($order = [Order::by('foo'), Order::by('bar')]);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($order, Helpers::property($new, 'order'));
+        $this->assertEquals($order, $this->expose($new)->order);
     }
 
     public function testLimit()
     {
-        $query = new DeleteQuery();
+        $query = new DeleteQuery(null, '');
         $new = $query->limit($limit = 5);
 
         $this->assertNotSame($query, $new);
-        $this->assertEquals($limit, Helpers::property($new, 'limit'));
+        $this->assertEquals($limit, $this->expose($new)->limit);
     }
 
     public function testExec()
@@ -88,7 +90,7 @@ class DeleteQueryTest extends TestCase
         $query = new DeleteQuery(null, 'test');
 
         $expected = 'DELETE FROM `test`';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
     }
@@ -96,12 +98,12 @@ class DeleteQueryTest extends TestCase
     public function testCompileWhere()
     {
         $where = $this->createMock(ExprInterface::class);
-        $where->expects($this->once())->method('toString')->willReturn('TEST_EXPR');
+        $where->expects($this->once())->method('toSql')->willReturn('TEST_EXPR');
 
         $query = new DeleteQuery(null, 'test', $where);
 
         $expected = 'DELETE FROM `test` WHERE TEST_EXPR';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
     }
@@ -115,7 +117,7 @@ class DeleteQueryTest extends TestCase
         ]);
 
         $expected = 'DELETE FROM `test`';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
     }
@@ -123,7 +125,7 @@ class DeleteQueryTest extends TestCase
     public function testCompileOrderWithWhere()
     {
         $where = $this->createMock(ExprInterface::class);
-        $where->expects($this->once())->method('toString')->willReturn('TEST_EXPR');
+        $where->expects($this->once())->method('toSql')->willReturn('TEST_EXPR');
 
         $query = new DeleteQuery(null, 'test', $where, [
             new Order('foo'),
@@ -132,7 +134,7 @@ class DeleteQueryTest extends TestCase
         ]);
 
         $expected = 'DELETE FROM `test` WHERE TEST_EXPR ORDER BY `foo` ASC, `bar` ASC, `baz` DESC';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
     }
@@ -142,7 +144,7 @@ class DeleteQueryTest extends TestCase
         $query = new DeleteQuery(null, 'test', null, [], 10);
 
         $expected = 'DELETE FROM `test` LIMIT 10';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
     }
@@ -150,7 +152,7 @@ class DeleteQueryTest extends TestCase
     public function testCompileWhereOrderLimit()
     {
         $where = $this->createMock(ExprInterface::class);
-        $where->expects($this->once())->method('toString')->willReturn('TEST_EXPR');
+        $where->expects($this->once())->method('toSql')->willReturn('TEST_EXPR');
 
         $query = new DeleteQuery(null, 'test', $where, [
             new Order('foo', Order::ASC),
@@ -158,21 +160,8 @@ class DeleteQueryTest extends TestCase
         ], 10);
 
         $expected = 'DELETE FROM `test` WHERE TEST_EXPR ORDER BY `foo` ASC, `bar` DESC LIMIT 10';
-        $actual = $query->compile();
+        $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
-    }
-
-    public function testCompileInvalidTable()
-    {
-        $query = new DeleteQuery(null, '');
-
-        try {
-            $query->compile();
-            $this->fail();
-        } catch (Throwable $e) {
-            $this->assertInstanceOf(QueryCompileException::class, $e);
-            $this->assertSame($query, $e->getQuery());
-        }
     }
 }

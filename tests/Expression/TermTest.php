@@ -155,9 +155,7 @@ class TermTest extends TestCase
             'array with bools' => [Term::create([true, false]), "(TRUE, FALSE)"],
             'array with mixed' => [Term::create(['foo', false, 1, null]), "('foo', FALSE, 1, NULL)"],
             'column' => [new Term(Term::COLUMN, 'foo'), "`foo`"],
-            'column with dot' => [new Term(Term::COLUMN, 'foo.name'), "`foo`.`name`"],
             'column as array' => [new Term(Term::COLUMN, ['foo', 'name']), "`foo`.`name`"],
-            'column as array with dot' => [new Term(Term::COLUMN, ['foo.name']), "`foo`.`name`"],
         ];
     }
 
@@ -172,6 +170,6 @@ class TermTest extends TestCase
     /** @dataProvider provideToStringData */
     public function testToString(Term $term, $expected)
     {
-        $this->assertEquals($expected, $term->toString());
+        $this->assertEquals($expected, $term->toSql());
     }
 }
