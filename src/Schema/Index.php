@@ -7,14 +7,13 @@ use RebelCode\Atlas\Order;
 /** @psalm-immutable */
 class Index
 {
-    /** @var bool */
-    protected $isUnique;
+    protected bool $isUnique;
 
     /**
      * @var array<string,string|null>
      * @psalm-var array<string, Order::*|null>
      */
-    protected $columns;
+    protected array $columns;
 
     /**
      * Constructor.

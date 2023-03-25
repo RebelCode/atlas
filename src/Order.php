@@ -8,14 +8,9 @@ class Order
     public const ASC = 'ASC';
     public const DESC = 'DESC';
 
-    /** @var string */
-    protected $field;
-
-    /**
-     * @var string
-     * @psalm-var Order::*
-     */
-    protected $sort;
+    protected string $field;
+    /** @psalm-var Order::* */
+    protected string $sort;
 
     /**
      * Constructor.

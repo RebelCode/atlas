@@ -10,17 +10,13 @@ class ForeignKey
     public const CASCADE = 'CASCADE';
     public const RESTRICT = 'RESTRICT';
 
-    /** @var string */
-    protected $foreignTable;
-
+    protected string $foreignTable;
     /** @var array<string,string> */
-    protected $mappings;
-
-    /** @var ForeignKey::* */
-    protected $updateRule;
-
-    /** @var ForeignKey::* */
-    protected $deleteRule;
+    protected array $mappings;
+    /** @psalm-var ForeignKey::* */
+    protected string $updateRule;
+    /** @psalm-var ForeignKey::* */
+    protected string $deleteRule;
 
     /**
      * Constructor.

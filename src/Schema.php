@@ -11,16 +11,13 @@ use RebelCode\Atlas\Schema\Key;
 class Schema
 {
     /** @var array<string,Column> */
-    protected $columns;
-
+    protected array $columns;
     /** @var array<string,Key> */
-    protected $keys;
-
+    protected array $keys;
     /** @var array<string,ForeignKey> */
-    protected $foreignKeys;
-
+    protected array $foreignKeys;
     /** @var array<string,Index> */
-    protected $indexes;
+    protected array $indexes;
 
     /**
      * @param array<string,Column> $columns A mapping of columns, keyed by their name.

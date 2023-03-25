@@ -5,11 +5,8 @@ namespace RebelCode\Atlas\Schema;
 /** @psalm-immutable */
 class Key
 {
-    /** @var bool */
-    protected $isPrimary;
-
-    /** @var list<string> */
-    protected $columns;
+    protected bool $isPrimary;
+    protected array $columns;
 
     /**
      * Constructor.

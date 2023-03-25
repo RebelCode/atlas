@@ -4,10 +4,9 @@ namespace RebelCode\Atlas;
 
 class Atlas
 {
-    /** @var DatabaseAdapter|null */
-    protected $adapter;
+    protected ?DatabaseAdapter $adapter;
     /** @var array<string,Table> */
-    protected $tables;
+    protected array $tables;
 
     /**
      * Constructor.

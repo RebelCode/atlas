@@ -8,17 +8,10 @@ use RebelCode\Atlas\Expression\Term;
 /** @psalm-immutable */
 class Column
 {
-    /** @var string */
-    protected $type;
-
-    /** @var ExprInterface|null */
-    protected $defaultValue;
-
-    /** @var bool */
-    protected $isNullable;
-
-    /** @var bool */
-    protected $autoInc;
+    protected string $type;
+    protected ?ExprInterface $defaultValue;
+    protected bool $isNullable;
+    protected bool $autoInc;
 
     /**
      * Construct a new column.
