@@ -32,4 +32,24 @@ class IndexTest extends TestCase
 
         $this->assertEquals($columns, $index->getColumns());
     }
+
+    public function testStaticColumns()
+    {
+        $index = Index::columns($columns = [
+            'foo' => Order::ASC,
+            'bar' => Order::DESC,
+        ]);
+
+        $this->assertInstanceOf(Index::class, $index);
+        $this->assertEquals($columns, $index->getColumns());
+    }
+
+    public function testUnique()
+    {
+        $index = new Index(false, []);
+        $clone = $index->unique();
+
+        $this->assertFalse($index->isUnique());
+        $this->assertTrue($clone->isUnique());
+    }
 }
