@@ -84,6 +84,19 @@ class SelectQuery extends Query implements DataSource
         return $new;
     }
 
+    /**
+     * Creates a copy with a new selection offset, based on the current limit and the given page number.
+     *
+     * @psalm-immutable
+     * @param int $pageNum The page number, starting from 1.
+     * @param int $pageSize The page size (a.k.a. the limit).
+     * @return SelectQuery
+     */
+    public function page(int $pageNum, int $pageSize): self
+    {
+        return $this->offset(($pageNum - 1) * $pageSize)->limit($pageSize);
+    }
+
     /** @inheritdoc */
     public function as(?string $alias): DataSource
     {
