@@ -24,8 +24,8 @@ class DropTableQuery extends Query
      * @param bool $cascade Whether to cascade the drop.
      */
     public function __construct(
-        ?DatabaseAdapter $adapter,
-        string $from,
+        ?DatabaseAdapter $adapter = null,
+        string $from = '',
         bool $ifExists = false,
         bool $cascade = false
     ) {

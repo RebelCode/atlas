@@ -39,8 +39,8 @@ class SelectQuery extends Query implements DataSource
      * @param int|null $offset The OFFSET clause.
      */
     public function __construct(
-        ?DatabaseAdapter $adapter,
-        DataSource $from,
+        ?DatabaseAdapter $adapter = null,
+        ?DataSource $from = null,
         array $columns = [],
         ?ExprInterface $where = null,
         array $order = [],

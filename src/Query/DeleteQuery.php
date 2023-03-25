@@ -29,8 +29,8 @@ class DeleteQuery extends Query
      * @param int|null $limit The limit, or null for no limit.
      */
     public function __construct(
-        ?DatabaseAdapter $adapter,
-        string $from,
+        ?DatabaseAdapter $adapter = null,
+        string $from = '',
         ?ExprInterface $where = null,
         array $order = [],
         ?int $limit = null
