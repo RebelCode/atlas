@@ -3,6 +3,7 @@
 namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
@@ -60,6 +61,26 @@ class FunctionsTest extends TestCase
 
         $this->assertInstanceOf(ExprInterface::class, $actual);
         $this->assertEquals($expected, $actual->getValue());
+    }
+
+    public function testExprTwoArgs()
+    {
+        $expr = expr(1, '+');
+
+        $this->assertInstanceOf(BinaryExpr::class, $expr);
+        $this->assertEquals(1, $expr->getLeft()->getValue());
+        $this->assertEquals('+', $expr->getOperator());
+        $this->assertNull($expr->getRight()->getValue());
+    }
+
+    public function testExprThreeArgs()
+    {
+        $expr = expr(1, '+', 2);
+
+        $this->assertInstanceOf(BinaryExpr::class, $expr);
+        $this->assertEquals(1, $expr->getLeft()->getValue());
+        $this->assertEquals('+', $expr->getOperator());
+        $this->assertEquals(2, $expr->getRight()->getValue());
     }
 
     public function testNot()

@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
@@ -72,14 +73,27 @@ function desc(string $column): Order
 }
 
 /**
- * Creates a new expression term. This is an alias for the {@link Term::create()} method.
+ * Creates a new expression term or binary expression.
+ *
+ * When given only one argument, this function simply creates a term using {@link Term::create()}. When given two or
+ * three arguments, this function creates a binary expression using the first argument as the left-hand side, the second
+ * argument as the operator, and the third argument as the right-hand side.
  *
  * @param mixed $value The value to create the term from.
- * @return ExprInterface The created expression term.
+ * @param string|null $operator Optional operator to create a binary expression.
+ * @param mixed|null $value2 Optional second value to create a binary expression.
+ * @return ExprInterface The created expression.
  */
-function expr($value): ExprInterface
+function expr($value, ?string $operator = null, $value2 = null): ExprInterface
 {
-    return Term::create($value);
+    $left = Term::create($value);
+
+    if ($operator === null) {
+        return $left;
+    } else {
+        $right = Term::create($value2);
+        return new BinaryExpr($left, $operator, $right);
+    }
 }
 
 /**
