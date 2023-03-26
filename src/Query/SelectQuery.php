@@ -15,7 +15,6 @@ use Throwable;
 /** @psalm-immutable */
 class SelectQuery extends Query implements DataSource
 {
-    use Query\Traits\HasSelectColumnListTrait;
     use Query\Traits\HasJoinsTrait;
     use Query\Traits\HasWhereTrait;
     use Query\Traits\HasGroupByTrait;
