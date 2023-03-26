@@ -112,6 +112,9 @@ interface ExprInterface
     /** Creates a number negation expression. */
     public function neg(): UnaryExpr;
 
+    /** Creates a function expression. */
+    public function fn(string $fn): FnExpr;
+
     /** Compiles the expression into an SQL expression string. */
     public function toSql(): string;
 }

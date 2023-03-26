@@ -180,9 +180,9 @@ abstract class BaseExpr implements ExprInterface
         return new UnaryExpr(UnaryExpr::NEG, $this);
     }
 
-    public function fn(string $fn): UnaryExpr
+    public function fn(string $fn): FnExpr
     {
-        return new UnaryExpr($fn, $this);
+        return new FnExpr($fn, [$this]);
     }
 
     /** Converts the expression into its equivalent SQL string. */
