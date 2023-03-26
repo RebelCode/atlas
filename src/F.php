@@ -2,8 +2,9 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\FnExpr;
 use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\Expression\UnaryExpr;
 
 /**
  * Helper class for easily creating unary expressions for SQL functions.
@@ -11,14 +12,14 @@ use RebelCode\Atlas\Expression\UnaryExpr;
 abstract class F
 {
     /**
-     * Creates a unary expression.
+     * Creates a function expression.
      *
      * @param string $operator The called method name, which corresponds to the operator (a.k.a. function name).
-     * @param Term[] $arguments The call arguments, which corresponds to the operand. Only the first argument is used.
-     * @return UnaryExpr
+     * @param list<mixed|ExprInterface> $arguments The call arguments.
+     * @return FnExpr The created function expression.
      */
-    public static function __callStatic(string $operator, array $arguments)
+    public static function __callStatic(string $operator, array $arguments): FnExpr
     {
-        return new UnaryExpr($operator, $arguments[0]);
+        return new FnExpr($operator, array_map([Term::class, 'create'], $arguments));
     }
 }

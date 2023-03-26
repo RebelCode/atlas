@@ -3,19 +3,23 @@
 namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Expression\FnExpr;
 use RebelCode\Atlas\Expression\Term;
-use RebelCode\Atlas\Expression\UnaryExpr;
 use RebelCode\Atlas\F;
+use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
 class FTest extends TestCase
 {
+    use ReflectionHelper;
+
     public function testMagicStaticCall()
     {
-        $term = $this->createMock(Term::class);
-        $expr = F::foo($term);
+        $term1 = $this->createMock(Term::class);
+        $term2 = $this->createMock(Term::class);
+        $expr = F::foo($term1, $term2);
 
-        $this->assertInstanceOf(UnaryExpr::class, $expr);
-        $this->assertEquals('foo',$expr->getOperator());
-        $this->assertSame($term, $expr->getOperand());
+        $this->assertInstanceOf(FnExpr::class, $expr);
+        $this->assertEquals('foo', $this->expose($expr)->name);
+        $this->assertSame([$term1, $term2], $this->expose($expr)->args);
     }
 }
