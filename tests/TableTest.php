@@ -9,6 +9,7 @@ use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Order;
+use RebelCode\Atlas\Query\CompoundQuery;
 use RebelCode\Atlas\Query\CreateIndexQuery;
 use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Schema;
@@ -217,14 +218,17 @@ class TableTest extends TestCase
     public function testCreate(bool $ifNotExists, ?string $collate)
     {
         $table = new Table($name = 'test', $schema = $this->createMock(Schema::class));
-        $queries = $table->create($ifNotExists, $collate);
+        $query = $table->create($ifNotExists, $collate);
 
-        $this->assertCount(1, $queries);
-        $this->assertInstanceOf(CreateTableQuery::class, $query = $queries[0]);
-        $this->assertEquals($name, $this->expose($query)->name);
-        $this->assertEquals($ifNotExists, $this->expose($query)->ifNotExists);
-        $this->assertEquals($collate, $this->expose($query)->collate);
-        $this->assertSame($schema, $this->expose($query)->schema);
+        $this->assertInstanceOf(CompoundQuery::class, $query);
+        $this->assertCount(1, $query->getQueries());
+
+        $inner = $query->getQueries()[0];
+        $this->assertInstanceOf(CreateTableQuery::class, $inner);
+        $this->assertEquals($name, $this->expose($inner)->name);
+        $this->assertEquals($ifNotExists, $this->expose($inner)->ifNotExists);
+        $this->assertEquals($collate, $this->expose($inner)->collate);
+        $this->assertSame($schema, $this->expose($inner)->schema);
     }
 
     public function testCreateWithIndexes()
@@ -235,10 +239,14 @@ class TableTest extends TestCase
         ]);
 
         $table = new Table('test', $schema);
-        $queries = $table->create();
+        $query = $table->create();
+
+        $this->assertInstanceOf(CompoundQuery::class, $query);
+
+        $queries = $query->getQueries();
 
         $this->assertCount(3, $queries);
-
+        $this->assertInstanceOf(CreateTableQuery::class, $queries[0]);
         $this->assertInstanceOf(CreateIndexQuery::class, $queries[1]);
         $this->assertInstanceOf(CreateIndexQuery::class, $queries[2]);
         $this->assertEquals('test', $this->expose($queries[1])->table);

@@ -7,6 +7,7 @@ use RebelCode\Atlas\Exception\NoTableSchemaException;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Query\CompoundQuery;
 use RebelCode\Atlas\Query\CreateIndexQuery;
 use RebelCode\Atlas\Query\CreateTableQuery;
 use RebelCode\Atlas\Query\DeleteQuery;
@@ -186,9 +187,9 @@ class Table implements DataSource
      *
      * @param bool $ifNotExists If true, the created query will be a "CREATE TABLE IF NOT EXISTS". Default is true.
      * @param string|null $collate Optional collation name.
-     * @return Query[] The created queries: at least one to create the table, more to create the table's indices.
+     * @return CompoundQuery A compound query that contains the table creation query and any index creation queries.
      */
-    public function create(bool $ifNotExists = true, ?string $collate = null): array
+    public function create(bool $ifNotExists = true, ?string $collate = null): CompoundQuery
     {
         if ($this->schema === null) {
             throw new NoTableSchemaException(
@@ -204,7 +205,7 @@ class Table implements DataSource
                 $queries[] = new CreateIndexQuery($this->adapter, $this->name, $name, $index);
             }
 
-            return $queries;
+            return new CompoundQuery($queries);
         }
     }
 
