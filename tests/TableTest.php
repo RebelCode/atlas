@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Test;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\Expression\BinaryExpr;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Order;
@@ -85,10 +86,11 @@ class TableTest extends TestCase
     {
         $table = new Table('test');
 
-        $term = $table->col($value = 'foobar');
+        $col = $table->col('foo');
 
-        $this->assertEquals(['test', $value], $term->getValue());
-        $this->assertEquals(Term::COLUMN, $term->getType());
+        $this->assertInstanceOf(ColumnTerm::class, $col);
+        $this->assertEquals('test', $this->expose($col)->table);
+        $this->assertEquals('foo', $this->expose($col)->column);
     }
 
     public function testColMagicGetter()
@@ -96,9 +98,9 @@ class TableTest extends TestCase
         $table = new Table('test');
         $col = $table->foo;
 
-        $this->assertInstanceOf(Term::class, $col);
-        $this->assertEquals(['test', 'foo'], $col->getValue());
-        $this->assertEquals(Term::COLUMN, $col->getType());
+        $this->assertInstanceOf(ColumnTerm::class, $col);
+        $this->assertEquals('test', $this->expose($col)->table);
+        $this->assertEquals('foo', $this->expose($col)->column);
     }
 
     public function provideTablePropsForMagicGetterTest(): array
@@ -119,9 +121,9 @@ class TableTest extends TestCase
         $table = new Table('test');
         $col = $table->$name;
 
-        $this->assertInstanceOf(Term::class, $col);
-        $this->assertEquals(['test', $name], $col->getValue());
-        $this->assertEquals(Term::COLUMN, $col->getType());
+        $this->assertInstanceOf(ColumnTerm::class, $col);
+        $this->assertEquals('test', $this->expose($col)->table);
+        $this->assertEquals($name, $this->expose($col)->column);
     }
 
     public function testColumnNotExistsWithSchema()

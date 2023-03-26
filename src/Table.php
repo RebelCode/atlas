@@ -4,6 +4,7 @@ namespace RebelCode\Atlas;
 
 use DomainException;
 use RebelCode\Atlas\Exception\NoTableSchemaException;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Query\CreateIndexQuery;
@@ -44,7 +45,7 @@ class Table implements DataSource
      *
      * @param string $name The name of the column.
      */
-    public function __get($name): Term
+    public function __get($name): ColumnTerm
     {
         return $this->col($name);
     }
@@ -114,19 +115,21 @@ class Table implements DataSource
     }
 
     /**
-     * Begins building an expression with a table's column. Call methods on the returned object to continue building
+     * Creates a column term for a column in this table.
+     *
+     * This is a good way of starting an expression. Call methods on the returned object to continue building
      * the expression.
      *
      * @param string $column The column name.
-     * @return Term The created term.
+     * @return ColumnTerm The created term.
      */
-    public function col(string $column): Term
+    public function col(string $column): ColumnTerm
     {
         if ($this->schema !== null && !array_key_exists($column, $this->schema->getColumns())) {
             throw new DomainException("Column \"$column\" does not exist on table \"$this->name\"");
         }
 
-        return new Term(Term::COLUMN, [$this->name, $column]);
+        return new ColumnTerm($this->name, $column);
     }
 
     /**

@@ -22,40 +22,10 @@ class TermTest extends TestCase
 
     public function testConstructor()
     {
-        $term = new Term(Term::STRING, 'test', true);
+        $term = new Term(Term::STRING, 'test');
 
         $this->assertEquals(Term::STRING, $term->getType());
         $this->assertEquals('test', $term->getValue());
-        $this->assertEquals(true, $term->isDistinct());
-    }
-
-    public function testDistinctTrue()
-    {
-        $column = new Term(Term::COLUMN, 'foo', false);
-        $newColumn = $column->distinct();
-
-        $this->assertNotSame($column, $newColumn, 'The new column should be a new instance');
-        $this->assertFalse($column->isDistinct(), 'The original column should not be mutated');
-        $this->assertTrue($newColumn->isDistinct(), 'The new column should have distinct = true');
-    }
-
-    public function testDistinctFalse()
-    {
-        $column = new Term(Term::COLUMN, 'foo', true);
-        $newColumn = $column->distinct(false);
-
-        $this->assertNotSame($column, $newColumn, 'The new column should be a new instance');
-        $this->assertTrue($column->isDistinct(), 'The original column should not be mutated');
-        $this->assertFalse($newColumn->isDistinct(), 'The new column should have distinct = false');
-    }
-
-    public function testDistinctSame()
-    {
-        $column = new Term(Term::COLUMN, 'foo', false);
-        $newColumn = $column->distinct(false);
-
-        $this->assertSame($column, $newColumn, 'The new column should be a new instance');
-        $this->assertFalse($column->isDistinct(), 'The original column should not be mutated');
     }
 
     public function provideDetectTypeData(): array
@@ -154,17 +124,7 @@ class TermTest extends TestCase
             'array with strings' => [Term::create(['foo', 'bar']), "('foo', 'bar')"],
             'array with bools' => [Term::create([true, false]), "(TRUE, FALSE)"],
             'array with mixed' => [Term::create(['foo', false, 1, null]), "('foo', FALSE, 1, NULL)"],
-            'column' => [new Term(Term::COLUMN, 'foo'), "`foo`"],
-            'column as array' => [new Term(Term::COLUMN, ['foo', 'name']), "`foo`.`name`"],
         ];
-    }
-
-    public function testColumn()
-    {
-        $term = Term::column('foo');
-
-        $this->assertEquals('foo', $term->getValue());
-        $this->assertEquals(Term::COLUMN, $term->getType());
     }
 
     /** @dataProvider provideToStringData */

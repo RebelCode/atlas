@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 
@@ -43,7 +44,7 @@ trait HasSelectColumnListTrait
             } else {
                 $expr = ($value instanceof ExprInterface)
                     ? $value
-                    : new Term(Term::COLUMN, $value);
+                    : new ColumnTerm(null, $value);
 
                 $list[] = $expr->toSql() . (is_numeric($key) ? '' : " AS `$key`");
             }

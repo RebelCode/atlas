@@ -3,6 +3,7 @@
 namespace RebelCode\Atlas\Test;
 
 use PHPUnit\Framework\TestCase;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
@@ -16,9 +17,14 @@ use function RebelCode\Atlas\not;
 
 class FunctionsTest extends TestCase
 {
-    public function testCol()
+    public function testColOneArg()
     {
-        $this->assertEquals(col('name'), new Term(Term::COLUMN, 'name'));
+        $this->assertEquals(col('name'), new ColumnTerm(null, 'name'));
+    }
+
+    public function testColTwoArgs()
+    {
+        $this->assertEquals(col('test', 'name'), new ColumnTerm('test', 'name'));
     }
 
     public function testAsc()

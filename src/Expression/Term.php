@@ -10,30 +10,26 @@ class Term extends BaseExpr
     public const NUMBER = 0;
     public const STRING = 1;
     public const BOOLEAN = 2;
-    public const COLUMN = 3;
-    public const LIST = 4;
-    public const NULL = 5;
+    public const LIST = 3;
+    public const NULL = 4;
 
     /** @var mixed */
     protected $value;
     /** @psalm-var Term::* */
     protected int $type;
-    protected bool $distinct;
 
     /**
      * Constructor.
      *
      * @param int $type The term's type. See the constants in this class.
      * @param mixed $value The value.
-     * @param bool $distinct Whether the column is distinct or not. Only for terms of type {@link Term::COLUMN}.
      *
      * @psalm-param Term::* $type
      */
-    public function __construct(int $type, $value, bool $distinct = false)
+    public function __construct(int $type, $value)
     {
         $this->value = $value;
         $this->type = $type;
-        $this->distinct = $distinct;
     }
 
     /** @psalm-return Term::* */
@@ -48,18 +44,6 @@ class Term extends BaseExpr
         return $this->value;
     }
 
-    public function isDistinct(): bool
-    {
-        return $this->distinct;
-    }
-
-    public function distinct(bool $distinct = true): self
-    {
-        return $distinct === $this->distinct
-            ? $this
-            : new self($this->type, $this->value, $distinct);
-    }
-
     /** @psalm-suppress PossiblyInvalidCast */
     protected function toBaseString(): string
     {
@@ -72,14 +56,6 @@ class Term extends BaseExpr
                 return "'$this->value'";
             case self::BOOLEAN:
                 return $this->value ? 'TRUE' : 'FALSE';
-            case self::COLUMN:
-                $result = '`' . implode('`.`', (array) $this->value) . '`';
-
-                if ($this->distinct) {
-                    $result = 'DISTINCT ' . $result;
-                }
-
-                return $result;
             case self::LIST:
                 /** @psalm-var ExprInterface[] $elements */
                 $elements = $this->value;
@@ -95,10 +71,7 @@ class Term extends BaseExpr
     }
 
     /**
-     * Creates a term. This is the preferred way to create terms.
-     *
-     * Note that terms of type {@link Term::COLUMN} cannot be created with this method, since all strings are
-     * interpreted as terms of type {@link Term::STRING}.
+     * Creates a term from a value, automatically detecting the type.
      *
      * @psalm-mutation-free
      *
@@ -122,21 +95,6 @@ class Term extends BaseExpr
         }
 
         return new self($type, $value);
-    }
-
-    /**
-     * Creates a term of type {@link Term::COLUMN}.
-     *
-     * @psalm-mutation-free
-     *
-     * @param string $name The column name.
-     * @param string|null $alias Optional column alias.
-     * @return self
-     */
-    public static function column(string $name, ?string $alias = null): self
-    {
-        $value = ($alias === null) ? $name : [$name, $alias];
-        return new self(self::COLUMN, $value);
     }
 
     /**

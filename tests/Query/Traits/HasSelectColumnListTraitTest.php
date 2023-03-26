@@ -3,7 +3,7 @@
 namespace RebelCode\Atlas\Test\Query\Traits;
 
 use PHPUnit\Framework\TestCase;
-use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Query\Traits\HasSelectColumnListTrait;
 use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
@@ -22,7 +22,7 @@ class HasSelectColumnListTraitTest extends TestCase
 
     public function testCompile()
     {
-        $expr = Term::column('test')->gt(5);
+        $expr = (new ColumnTerm(null, 'test'))->gt(5);
         $subject = $this->getMockForTrait(HasSelectColumnListTrait::class)
                         ->columns(['foo', $expr, '*', 'baz' => 'bar']);
 

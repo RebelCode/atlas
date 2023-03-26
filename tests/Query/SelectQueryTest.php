@@ -5,8 +5,8 @@ namespace RebelCode\Atlas\Test\Query;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\DataSource;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
-use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
@@ -205,7 +205,7 @@ class SelectQueryTest extends TestCase
     {
         $source = $this->createDataSource('table');
         $query = new SelectQuery(null, $source, [
-            Term::column('foo')->distinct()->fn('COUNT'),
+            (new ColumnTerm(null, 'foo'))->distinct()->fn('COUNT'),
             'bar',
         ]);
 

@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 
@@ -12,12 +13,12 @@ use RebelCode\Atlas\Expression\Term;
  * @param string|null $arg2 The column name if the first argument is the source name or alias.
  * @return Term The column term.
  */
-function col(string $arg1, ?string $arg2 = null): Term
+function col(string $arg1, ?string $arg2 = null): ColumnTerm
 {
     if ($arg2 === null) {
-        return new Term(Term::COLUMN, $arg1);
+        return new ColumnTerm(null, $arg1);
     } else {
-        return new Term(Term::COLUMN, [$arg1, $arg2]);
+        return new ColumnTerm($arg1, $arg2);
     }
 }
 

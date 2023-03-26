@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\DataSource;
 use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Order;
@@ -159,7 +160,7 @@ class SelectQuery extends Query implements DataSource
             } else {
                 $expr = ($value instanceof ExprInterface)
                     ? $value
-                    : new Term(Term::COLUMN, $value);
+                    : new ColumnTerm(null, $value);
 
                 $list[] = $expr->toSql() . (is_numeric($key) ? '' : " AS `$key`");
             }
