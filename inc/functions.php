@@ -69,3 +69,38 @@ function desc(string $column): Order
 {
     return new Order($column, Order::DESC);
 }
+
+/**
+ * Creates a new expression term. This is an alias for the {@link Term::create()} method.
+ *
+ * @param mixed $value The value to create the term from.
+ * @return ExprInterface The created expression term.
+ */
+function expr($value): ExprInterface
+{
+    return Term::create($value);
+}
+
+/**
+ * Creates a boolean NOT unary expression. This is an alias for calling the {@link ExprInterface::not()} method on the
+ * passed argument.
+ *
+ * @param ExprInterface $expr The expression to negate.
+ * @return ExprInterface The created expression.
+ */
+function not(ExprInterface $expr): ExprInterface
+{
+    return $expr->not();
+}
+
+/**
+ * Creates a number negation unary expression. This is an alias for calling the {@link ExprInterface::not()} method on
+ * the passed argument.
+ *
+ * @param ExprInterface $expr The expression to negate.
+ * @return ExprInterface The created expression.
+ */
+function neg(ExprInterface $expr): ExprInterface
+{
+    return $expr->neg();
+}
