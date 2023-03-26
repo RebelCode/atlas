@@ -1,13 +1,15 @@
 <?php
 
-/** For use in select queries, for readability purposes. */
+namespace RebelCode\Atlas;
 
-use RebelCode\Atlas\Join;
-use RebelCode\Atlas\Order;
-
+// For use in select queries, for readability purposes.
 const ALL = ['*'];
+
+// Aliases for order constants
 const ASC = Order::ASC;
 const DESC = Order::DESC;
+
+// Aliases for join constants
 const INNER = Join::INNER;
 const CROSS = Join::CROSS;
 const STRAIGHT = Join::STRAIGHT;
