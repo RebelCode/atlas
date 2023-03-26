@@ -32,16 +32,6 @@ class UnaryExpr extends BaseExpr
     {
         $term = $this->operand->toSql();
 
-        $isColumn = ($this->operand instanceof Term && $this->operand->getType() === Term::COLUMN);
-        $isDistinct = $isColumn && $this->operand->isDistinct();
-        $distinct = $isDistinct ? 'DISTINCT ' : '';
-
-        $result = "$this->operator($distinct$term)";
-
-        if ($this->alias !== null) {
-            $result .= " AS `$this->alias`";
-        }
-
-        return $result;
+        return "$this->operator($term)";
     }
 }

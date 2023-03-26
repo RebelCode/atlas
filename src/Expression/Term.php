@@ -73,7 +73,13 @@ class Term extends BaseExpr
             case self::BOOLEAN:
                 return $this->value ? 'TRUE' : 'FALSE';
             case self::COLUMN:
-                return '`' . implode('`.`', (array) $this->value) . '`';
+                $result = '`' . implode('`.`', (array) $this->value) . '`';
+
+                if ($this->distinct) {
+                    $result = 'DISTINCT ' . $result;
+                }
+
+                return $result;
             case self::LIST:
                 /** @psalm-var ExprInterface[] $elements */
                 $elements = $this->value;
