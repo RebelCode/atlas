@@ -9,6 +9,8 @@ use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 use RebelCode\Atlas\Order;
+use RebelCode\Atlas\Table;
+use RebelCode\Atlas\TableRef;
 use function RebelCode\Atlas\asc;
 use function RebelCode\Atlas\col;
 use function RebelCode\Atlas\desc;
@@ -18,14 +20,23 @@ use function RebelCode\Atlas\not;
 
 class FunctionsTest extends TestCase
 {
-    public function testColOneArg()
+    public function provideDataForColTest(): array
     {
-        $this->assertEquals(col('name'), new ColumnTerm(null, 'name'));
+        return [
+            '(col_name)' => [new ColumnTerm(null, 'name'), 'name', null],
+            '(col_term)' => [$t = new ColumnTerm(null, 'name'), $t, null],
+            '(table_name, col_name)' => [new ColumnTerm('users', 'name'), 'users', 'name'],
+            '(table, col_name)' => [new ColumnTerm('users', 'name'), new Table('users'), 'name'],
+            '(aliased_table, col_name)' => [new ColumnTerm('u', 'name'), (new Table('users'))->as('u'), 'name'],
+            '(table_ref, col_name)' => [new ColumnTerm('users', 'name'), new TableRef('users'), 'name'],
+            '(aliased_table_ref, col_name)' => [new ColumnTerm('u', 'name'), new TableRef('users', 'u'), 'name'],
+        ];
     }
 
-    public function testColTwoArgs()
+    /** @dataProvider provideDataForColTest */
+    public function testCol(ColumnTerm $expected, $arg1, $arg2)
     {
-        $this->assertEquals(col('test', 'name'), new ColumnTerm('test', 'name'));
+        $this->assertEquals($expected, col($arg1, $arg2));
     }
 
     public function testAsc()

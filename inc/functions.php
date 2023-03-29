@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas;
 
+use InvalidArgumentException;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
@@ -10,16 +11,29 @@ use RebelCode\Atlas\Expression\Term;
 /**
  * Creates a new column term.
  *
- * @param string $arg1 The column name if one argument is given, the source name or alias if two arguments are given.
- * @param string|null $arg2 The column name if the first argument is the source name or alias.
- * @return Term The column term.
+ * @param string|ColumnTerm|Table|TableRef $arg1 The column name or term if only 1 arg is given. Otherwise, the table
+ *                                               name, instance, or reference.
+ * @param string|null $arg2 The column name if the 1st arg is a table name, instance, or reference.
+ * @return ColumnTerm The column term.
  */
-function col(string $arg1, ?string $arg2 = null): ColumnTerm
+function col($arg1, ?string $arg2 = null): ColumnTerm
 {
     if ($arg2 === null) {
-        return new ColumnTerm(null, $arg1);
+        if ($arg1 instanceof ColumnTerm) {
+            return $arg1;
+        } elseif (is_string($arg1)) {
+            return new ColumnTerm(null, $arg1);
+        } else {
+            throw new InvalidArgumentException('Expected column name or term, got ' . gettype($arg1));
+        }
     } else {
-        return new ColumnTerm($arg1, $arg2);
+        if ($arg1 instanceof Table || $arg1 instanceof TableRef) {
+            return new ColumnTerm($arg1->getAlias() ?? $arg1->getName(), $arg2);
+        } elseif (is_string($arg1)) {
+            return new ColumnTerm($arg1, $arg2);
+        } else {
+            throw new InvalidArgumentException('Expected table name, instance, or reference, got ' . gettype($arg1));
+        }
     }
 }
 
