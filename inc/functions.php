@@ -133,3 +133,14 @@ function neg(ExprInterface $expr): ExprInterface
 {
     return $expr->neg();
 }
+
+/**
+ * Creates a distinct column term. This is an alias for calling the {@link ColumnTerm::distinct()} method on the column.
+ *
+ * @param ColumnTerm $col The column term.
+ * @return ColumnTerm The distinct column term.
+ */
+function distinct(ColumnTerm $col): ColumnTerm
+{
+    return $col->distinct();
+}

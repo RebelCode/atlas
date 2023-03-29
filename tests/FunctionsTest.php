@@ -14,6 +14,7 @@ use RebelCode\Atlas\TableRef;
 use function RebelCode\Atlas\asc;
 use function RebelCode\Atlas\col;
 use function RebelCode\Atlas\desc;
+use function RebelCode\Atlas\distinct;
 use function RebelCode\Atlas\expr;
 use function RebelCode\Atlas\neg;
 use function RebelCode\Atlas\not;
@@ -114,5 +115,14 @@ class FunctionsTest extends TestCase
         $actual = neg($arg);
 
         $this->assertSame($expected, $actual);
+    }
+
+    public function testDistinct()
+    {
+        $col1 = $this->createMock(ColumnTerm::class);
+        $col2 = $this->createMock(ColumnTerm::class);
+        $col1->expects($this->once())->method('distinct')->willReturn($col2);
+
+        $this->assertSame($col2, distinct($col1));
     }
 }
