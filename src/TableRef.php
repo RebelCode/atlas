@@ -32,6 +32,12 @@ class TableRef implements DataSource
         return $clone;
     }
 
+    /** Retrieves the table name.  */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     /** @inheritDoc */
     public function getAlias(): ?string
     {
