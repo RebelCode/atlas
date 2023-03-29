@@ -8,12 +8,12 @@ use RebelCode\Atlas\DataSource;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Group;
+use RebelCode\Atlas\Join;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
-// @todo Test with joins
 class SelectQueryTest extends TestCase
 {
     use ReflectionHelper;
@@ -23,7 +23,7 @@ class SelectQueryTest extends TestCase
         $source = $this->createMock(DataSource::class);
 
         if ($name !== null) {
-            $source->expects($this->once())->method('compileSource')->willReturn($name);
+            $source->method('compileSource')->willReturn($name);
         }
 
         return $source;
@@ -343,6 +343,27 @@ class SelectQueryTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testCompileJoins()
+    {
+        $users = $this->createDataSource('users');
+        $posts = $this->createDataSource('posts');
+        $comments = $this->createDataSource('comments');
+
+        $expr = $this->createMock(ExprInterface::class);
+        $expr->expects($this->once())->method('toSql')->willReturn('foobar');
+
+        $query = new SelectQuery(null, $users);
+        $query = $query->join([
+            new Join(Join::INNER, $posts, $expr),
+            new Join(Join::CROSS, $comments),
+        ]);
+
+        $expected = 'SELECT * FROM users INNER JOIN posts ON foobar CROSS JOIN comments';
+        $actual = $query->toSql();
+
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testCompileSelectEverything()
     {
         $source = $this->createDataSource('table');
@@ -353,6 +374,9 @@ class SelectQueryTest extends TestCase
         $having = $this->createMock(ExprInterface::class);
         $having->expects($this->once())->method('toSql')->willReturn('TEST_HAVING');
 
+        $joinOn = $this->createMock(ExprInterface::class);
+        $joinOn->expects($this->once())->method('toSql')->willReturn('TEST_JOIN');
+
         $query = new SelectQuery(
             null,
             $source,
@@ -362,9 +386,25 @@ class SelectQueryTest extends TestCase
             10,
             5
         );
-        $query = $query->groupBy([Group::by('foo')->asc()])->having($having);
+        $query = $query
+            ->groupBy([Group::by('foo')->asc()])
+            ->having($having)
+            ->join([
+                new Join(Join::INNER, $source, $joinOn),
+            ]);
 
-        $expected = 'SELECT `foo`, `bar` AS `baz` FROM table WHERE TEST_WHERE GROUP BY `foo` ASC HAVING TEST_HAVING ORDER BY `foo` DESC LIMIT 10 OFFSET 5';
+        $expected = str_replace("\n", " ", <<<SQL
+        SELECT `foo`, `bar` AS `baz`
+        FROM table
+        INNER JOIN table ON TEST_JOIN
+        WHERE TEST_WHERE
+        GROUP BY `foo` ASC
+        HAVING TEST_HAVING
+        ORDER BY `foo` DESC
+        LIMIT 10
+        OFFSET 5
+        SQL);
+
         $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
