@@ -20,8 +20,8 @@ class ColumnTermTest extends TestCase
     {
         $col = new ColumnTerm('test', 'foo');
 
-        $this->assertEquals('test', $this->expose($col)->table);
-        $this->assertEquals('foo', $this->expose($col)->column);
+        $this->assertEquals('test', $col->getTable());
+        $this->assertEquals('foo', $col->getName());
         $this->assertFalse($this->expose($col)->distinct);
     }
 
@@ -29,8 +29,8 @@ class ColumnTermTest extends TestCase
     {
         $col = new ColumnTerm(null, 'foo');
 
-        $this->assertNull($this->expose($col)->table);
-        $this->assertEquals('foo', $this->expose($col)->column);
+        $this->assertNull($col->getTable());
+        $this->assertEquals('foo', $col->getName());
         $this->assertFalse($this->expose($col)->distinct);
     }
 
@@ -38,8 +38,8 @@ class ColumnTermTest extends TestCase
     {
         $col = new ColumnTerm('test', 'foo', true);
 
-        $this->assertEquals('test', $this->expose($col)->table);
-        $this->assertEquals('foo', $this->expose($col)->column);
+        $this->assertEquals('test', $col->getTable());
+        $this->assertEquals('foo', $col->getName());
         $this->assertTrue($this->expose($col)->distinct);
     }
 
@@ -47,8 +47,8 @@ class ColumnTermTest extends TestCase
     {
         $col = new ColumnTerm('test', 'foo', false);
 
-        $this->assertEquals('test', $this->expose($col)->table);
-        $this->assertEquals('foo', $this->expose($col)->column);
+        $this->assertEquals('test', $col->getTable());
+        $this->assertEquals('foo', $col->getName());
         $this->assertFalse($this->expose($col)->distinct);
     }
 

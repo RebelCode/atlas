@@ -43,14 +43,24 @@ class FunctionsTest extends TestCase
         $this->assertEquals($expected, col($arg1, $arg2));
     }
 
-    public function testAsc()
+    public function provideDataForAscDescTests(): array
     {
-        $this->assertEquals(asc('name'), new Order('name', Order::ASC));
+        return [
+            'column name' => ['name', 'name'],
+            'column term' => ['name', new ColumnTerm(null, 'name')],
+        ];
     }
 
-    public function testDesc()
+    /** @dataProvider provideDataForAscDescTests */
+    public function testAsc(string $expected, $arg)
     {
-        $this->assertEquals(desc('name'), new Order('name', Order::DESC));
+        $this->assertEquals(asc($expected), new Order($arg, Order::ASC));
+    }
+
+    /** @dataProvider provideDataForAscDescTests */
+    public function testDesc(string $expected, $arg)
+    {
+        $this->assertEquals(desc($expected), new Order($arg, Order::DESC));
     }
 
     public function provideValuesForExprTest(): array

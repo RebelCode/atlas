@@ -27,6 +27,24 @@ class ColumnTerm extends BaseExpr
         $this->distinct = $distinct;
     }
 
+    /** Retrieves the table name, if any. */
+    public function getTable(): ?string
+    {
+        return $this->table;
+    }
+
+    /** Retrieves the column name. */
+    public function getName(): string
+    {
+        return $this->column;
+    }
+
+    /**
+     * Changes whether the column is distinct.
+     *
+     * @param bool $distinct True to make the column distinct, false to make it non-distinct. Defaults to true.
+     * @return ColumnTerm The new column term instance.
+     */
     public function distinct(bool $distinct = true): self
     {
         $clone = clone $this;

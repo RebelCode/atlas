@@ -2,6 +2,8 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Expression\ColumnTerm;
+
 /** @psalm-immutable */
 class Order
 {
@@ -15,14 +17,14 @@ class Order
     /**
      * Constructor.
      *
-     * @param string $column The column to sort by.
+     * @param string|ColumnTerm $column The column to sort by.
      * @param string $sort The sort order.
      *
      * @psalm-param Order::* $sort
      */
-    public function __construct(string $column, string $sort = self::ASC)
+    public function __construct($column, string $sort = self::ASC)
     {
-        $this->column = $column;
+        $this->column = $column instanceof ColumnTerm ? $column->getName() : $column;
         $this->sort = $sort;
     }
 

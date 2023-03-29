@@ -95,10 +95,10 @@ function using(string $type, ?DataSource $with = null, ?ExprInterface $on = null
  * Creates an ascending order instance for a column.
  *
  * @psalm-pure
- * @param string $column The column name.
+ * @param string|ColumnTerm $column The column name or term.
  * @return Order|Group The order instance.
  */
-function asc(string $column): Order
+function asc($column): Order
 {
     return new Order($column, Order::ASC);
 }
@@ -107,10 +107,10 @@ function asc(string $column): Order
  * Creates a descending order instance for a column.
  *
  * @psalm-pure
- * @param string $column The column name.
+ * @param string|ColumnTerm $column The column name or term.
  * @return Order|Group The order instance.
  */
-function desc(string $column): Order
+function desc($column): Order
 {
     return new Order($column, Order::DESC);
 }
