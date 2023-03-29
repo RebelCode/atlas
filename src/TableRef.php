@@ -2,8 +2,10 @@
 
 namespace RebelCode\Atlas;
 
+use RebelCode\Atlas\Expression\ColumnTerm;
+
 /**
- * A data source that refers to a table by name. This is useful when the {@link Table} class cannot be obtained.
+ * A data source that refers to a table by name. This is useful when the {@link Table} instance cannot be obtained.
  *
  * @psalm-immutable
  */
@@ -30,6 +32,30 @@ class TableRef implements DataSource
         $clone = clone $this;
         $clone->alias = $alias;
         return $clone;
+    }
+
+    /**
+     * Creates a column term for a column using the table ref's name or alias.
+     *
+     * Note: the table alias is prioritized over the name.
+     *
+     * @param string $col The column name.
+     * @return ColumnTerm The created column term.
+     */
+    public function col(string $col): ColumnTerm
+    {
+        return new ColumnTerm($this->alias ?? $this->name, $col);
+    }
+
+    /**
+     * Magic getter alias for {@link TableRef::col()}.
+     *
+     * @param string $name The column name.
+     * @return ColumnTerm The created column term.
+     */
+    public function __get(string $name): ColumnTerm
+    {
+        return $this->col($name);
     }
 
     /** Retrieves the table name.  */
