@@ -69,6 +69,8 @@ class ForeignKey extends Key
      *
      * @param string|null $updateRule Optional update rule. Defaults to {@link ForeignKey::RESTRICT}
      * @return static The new instance.
+     *
+     * @psalm-param ForeignKey::*|null $updateRule
      */
     public function onUpdate(?string $updateRule): self
     {
@@ -82,6 +84,8 @@ class ForeignKey extends Key
      *
      * @param string|null $deleteRule Optional delete rule. Defaults to {@link ForeignKey::RESTRICT}
      * @return static The new instance.
+     *
+     * @psalm-param ForeignKey::*|null $deleteRule
      */
     public function onDelete(?string $deleteRule): self
     {
