@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Query\Traits;
 use InvalidArgumentException;
 use RebelCode\Atlas\Group;
 
+/** @psalm-immutable */
 trait HasGroupByTrait
 {
     /** @var Group[] */

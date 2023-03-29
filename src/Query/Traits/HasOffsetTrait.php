@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
+/** @psalm-immutable */
 trait HasOffsetTrait
 {
     protected ?int $offset = null;

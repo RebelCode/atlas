@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Order;
 
+/** @psalm-immutable */
 trait HasOrderTrait
 {
     /** @var Order[] */

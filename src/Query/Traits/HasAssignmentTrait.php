@@ -5,6 +5,7 @@ namespace RebelCode\Atlas\Query\Traits;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 
+/** @psalm-immutable */
 trait HasAssignmentTrait
 {
     /** @var array<string,scalar|ExprInterface> */

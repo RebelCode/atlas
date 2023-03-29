@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Join;
 
+/** @psalm-immutable */
 trait HasJoinsTrait
 {
     /** @var Join[] */

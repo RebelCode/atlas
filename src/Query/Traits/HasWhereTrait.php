@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Expression\ExprInterface;
 
+/** @psalm-immutable */
 trait HasWhereTrait
 {
     protected ?ExprInterface $where = null;

@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
+/** @psalm-immutable */
 trait HasLimitTrait
 {
     protected ?int $limit = null;
