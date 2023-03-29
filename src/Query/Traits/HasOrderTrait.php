@@ -38,7 +38,7 @@ trait HasOrderTrait
 
         $orderParts = [];
         foreach ($this->order as $order) {
-            $orderParts[] = "`{$order->getField()}` {$order->getSort()}";
+            $orderParts[] = "`{$order->getColumn()}` {$order->getSort()}";
         }
 
         return 'ORDER BY ' . implode(', ', $orderParts);

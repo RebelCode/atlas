@@ -8,24 +8,27 @@ class Order
     public const ASC = 'ASC';
     public const DESC = 'DESC';
 
-    protected string $field;
+    protected string $column;
     /** @psalm-var Order::* */
     protected string $sort;
 
     /**
      * Constructor.
      *
+     * @param string $column The column to sort by.
+     * @param string $sort The sort order.
+     *
      * @psalm-param Order::* $sort
      */
-    public function __construct(string $field, string $sort = self::ASC)
+    public function __construct(string $column, string $sort = self::ASC)
     {
-        $this->field = $field;
+        $this->column = $column;
         $this->sort = $sort;
     }
 
-    public function getField(): string
+    public function getColumn(): string
     {
-        return $this->field;
+        return $this->column;
     }
 
     /** @psalm-return Order::* */
@@ -37,19 +40,19 @@ class Order
     public function asc(): Order
     {
         return ($this->sort === self::DESC)
-            ? new self($this->field, self::ASC)
+            ? new self($this->column, self::ASC)
             : $this;
     }
 
     public function desc(): Order
     {
         return ($this->sort === self::ASC)
-            ? new self($this->field, self::DESC)
+            ? new self($this->column, self::DESC)
             : $this;
     }
 
-    public static function by(string $field): Order
+    public static function by(string $column): Order
     {
-        return new self($field);
+        return new self($column);
     }
 }

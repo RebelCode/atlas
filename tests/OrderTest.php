@@ -9,25 +9,25 @@ class OrderTest extends TestCase
 {
     public function testConstructorNoSort()
     {
-        $order = new Order($field = 'foo');
+        $order = new Order($column = 'foo');
 
-        $this->assertEquals($field, $order->getField());
+        $this->assertEquals($column, $order->getColumn());
         $this->assertEquals(Order::ASC, $order->getSort());
     }
 
     public function testConstructorAsc()
     {
-        $order = new Order($field = 'foo', Order::ASC);
+        $order = new Order($column = 'foo', Order::ASC);
 
-        $this->assertEquals($field, $order->getField());
+        $this->assertEquals($column, $order->getColumn());
         $this->assertEquals(Order::ASC, $order->getSort());
     }
 
     public function testConstructorDesc()
     {
-        $order = new Order($field = 'foo', Order::DESC);
+        $order = new Order($column = 'foo', Order::DESC);
 
-        $this->assertEquals($field, $order->getField());
+        $this->assertEquals($column, $order->getColumn());
         $this->assertEquals(Order::DESC, $order->getSort());
     }
 }
