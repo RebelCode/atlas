@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Test;
 
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
@@ -9,8 +10,10 @@ use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Expression\UnaryExpr;
 use RebelCode\Atlas\Order;
+use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Table;
 use RebelCode\Atlas\TableRef;
+use function RebelCode\Atlas\all;
 use function RebelCode\Atlas\asc;
 use function RebelCode\Atlas\col;
 use function RebelCode\Atlas\desc;
@@ -124,5 +127,30 @@ class FunctionsTest extends TestCase
         $col1->expects($this->once())->method('distinct')->willReturn($col2);
 
         $this->assertSame($col2, distinct($col1));
+    }
+
+    public function provideDataForAllTest(): array
+    {
+        return [
+            'name' => ['users', new ColumnTerm('users', '*')],
+            'table' => [new Table('users'), new ColumnTerm('users', '*')],
+            'aliased_table' => [(new Table('users'))->as('u'), new ColumnTerm('u', '*')],
+            'table_ref' => [new TableRef('users'), new ColumnTerm('users', '*')],
+            'aliased_table_ref' => [new TableRef('users', 'u'), new ColumnTerm('u', '*')],
+            'select_query' => [(new SelectQuery())->as('s'), new ColumnTerm('s', '*')],
+        ];
+    }
+
+    /** @dataProvider provideDataForAllTest */
+    public function testAll($arg, $expected)
+    {
+        $this->assertEquals($expected, all($arg));
+    }
+
+    public function testAllSelectNoAlias()
+    {
+        $this->expectException(LogicException::class);
+
+        all(new SelectQuery());
     }
 }

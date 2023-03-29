@@ -3,6 +3,7 @@
 namespace RebelCode\Atlas;
 
 use InvalidArgumentException;
+use LogicException;
 use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
@@ -49,6 +50,29 @@ function col($arg1, ?string $arg2 = null): ColumnTerm
 function table(string $name, ?string $alias = null): TableRef
 {
     return new TableRef($name, $alias);
+}
+
+/**
+ * Creates a column term that references all columns for a data source.
+ *
+ * @param string|DataSource $source The data source.
+ * @return ColumnTerm The created column term.
+ */
+function all($source): ColumnTerm
+{
+    if ($source instanceof DataSource) {
+        $name = $source->getAlias();
+
+        if ($source instanceof Table || $source instanceof TableRef) {
+            $name = $name ?? $source->getName();
+        } elseif ($name === null) {
+            throw new LogicException('Data source must have an alias to be used as a derived table');
+        }
+    } else {
+        $name = $source;
+    }
+
+    return new ColumnTerm($name, '*');
 }
 
 /**
