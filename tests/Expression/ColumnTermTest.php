@@ -59,11 +59,13 @@ class ColumnTermTest extends TestCase
             'with table' => ['test', 'foo', false, '`test`.`foo`'],
             'no table, distinct' => [null, 'foo', true, 'DISTINCT `foo`'],
             'with table, distinct' => ['test', 'foo', true, 'DISTINCT `test`.`foo`'],
+            'no table, all' => [null, '*', false, '*'],
+            'with table, all' => ['test', '*', false, '`test`.*'],
         ];
     }
 
     /** @dataProvider provideDataForToSqlTest */
-    public function testToSqlNoTable(?string $table, string $column, bool $distinct, string $expected)
+    public function testToSql(?string $table, string $column, bool $distinct, string $expected)
     {
         $col = new ColumnTerm($table, $column, $distinct);
         $this->assertEquals($expected, $col->toSql());

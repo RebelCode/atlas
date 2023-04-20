@@ -55,9 +55,13 @@ class ColumnTerm extends BaseExpr
     /** @inheritDoc */
     protected function toBaseString(): string
     {
+        $colName = $this->column === '*'
+            ? '*'
+            : "`{$this->column}`";
+
         $result = $this->table !== null
-            ? "`{$this->table}`.`{$this->column}`"
-            : "`$this->column`";
+            ? "`{$this->table}`.{$colName}"
+            : "{$colName}";
 
         if ($this->distinct) {
             $result = "DISTINCT $result";
