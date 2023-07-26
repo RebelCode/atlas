@@ -130,9 +130,13 @@ class SelectQuery extends Query implements DataSource
                 $this->compileGroupBy(),
                 $this->compileHaving(),
                 $this->compileOrder(),
-                $this->compileLimit(),
-                $this->compileOffset(),
             ];
+
+            $limit = $this->compileLimit();
+            if ($limit !== '') {
+                $result[] = $limit;
+                $result[] = $this->compileOffset();
+            }
 
             return implode(' ', array_filter($result));
         } catch (Throwable $e) {

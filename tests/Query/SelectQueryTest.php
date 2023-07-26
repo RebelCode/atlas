@@ -332,12 +332,23 @@ class SelectQueryTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testCompileSelectOffset()
+    public function testCompileSelectLimitAndOffset()
+    {
+        $source = $this->createDataSource('table');
+        $query = new SelectQuery(null, $source, [], null, [], 10, 5);
+
+        $expected = 'SELECT * FROM table LIMIT 10 OFFSET 5';
+        $actual = $query->toSql();
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testCompileSelectOffsetNoLimit()
     {
         $source = $this->createDataSource('table');
         $query = new SelectQuery(null, $source, [], null, [], null, 5);
 
-        $expected = 'SELECT * FROM table OFFSET 5';
+        $expected = 'SELECT * FROM table';
         $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
