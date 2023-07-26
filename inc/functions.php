@@ -17,6 +17,8 @@ use RebelCode\Atlas\Expression\Term;
  *                                               name, instance, or reference.
  * @param string|null $arg2 The column name if the 1st arg is a table name, instance, or reference.
  * @return ColumnTerm The column term.
+ *
+ * @throws InvalidArgumentException
  */
 function col($arg1, ?string $arg2 = null): ColumnTerm
 {
@@ -57,6 +59,8 @@ function table(string $name, ?string $alias = null): TableRef
  *
  * @param string|DataSource $source The data source.
  * @return ColumnTerm The created column term.
+ *
+ * @throws LogicException If the data source is not a table or table ref and has no alias.
  */
 function all($source): ColumnTerm
 {
