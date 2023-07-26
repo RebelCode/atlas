@@ -13,7 +13,9 @@ use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Table;
 use RebelCode\Atlas\TableRef;
+
 use function RebelCode\Atlas\all;
+use function RebelCode\Atlas\andAll;
 use function RebelCode\Atlas\asc;
 use function RebelCode\Atlas\col;
 use function RebelCode\Atlas\desc;
@@ -21,6 +23,7 @@ use function RebelCode\Atlas\distinct;
 use function RebelCode\Atlas\expr;
 use function RebelCode\Atlas\neg;
 use function RebelCode\Atlas\not;
+use function RebelCode\Atlas\orAll;
 
 class FunctionsTest extends TestCase
 {
@@ -162,5 +165,49 @@ class FunctionsTest extends TestCase
         $this->expectException(LogicException::class);
 
         all(new SelectQuery());
+    }
+
+    public function provideDataForTestOrAll(): array
+    {
+        $foo = Term::create('foo');
+        $bar = Term::create('bar');
+        $baz = Term::create('baz');
+
+        return [
+            'empty' => [[], Term::create(false)],
+            'one' => [[$foo], $foo],
+            'two' => [[$foo, $bar], $foo->or($bar)],
+            'two' => [[$foo, $bar, $baz], $foo->or($bar)->or($baz)],
+        ];
+    }
+
+    /** @dataProvider provideDataForTestOrAll */
+    public function testOrAll($in, $expected)
+    {
+        $result = orAll($in);
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function provideDataForTestAndAll(): array
+    {
+        $foo = Term::create('foo');
+        $bar = Term::create('bar');
+        $baz = Term::create('baz');
+
+        return [
+            'empty' => [[], Term::create(false)],
+            'one' => [[$foo], $foo],
+            'two' => [[$foo, $bar], $foo->and($bar)],
+            'two' => [[$foo, $bar, $baz], $foo->and($bar)->and($baz)],
+        ];
+    }
+
+    /** @dataProvider provideDataForTestAndAll */
+    public function testAndAll($in, $expected)
+    {
+        $result = andAll($in);
+
+        $this->assertEquals($expected, $result);
     }
 }

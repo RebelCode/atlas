@@ -177,3 +177,51 @@ function distinct(ColumnTerm $col): ColumnTerm
 {
     return $col->distinct();
 }
+
+/**
+ * ORs a list of expressions into a single expression.
+ *
+ * @psalm-pure
+ * @param iterable<ExprInterface> $exprs The expressions to OR.
+ * @return ExprInterface The created expression.
+ */
+function orAll(iterable $exprs): ExprInterface
+{
+    $result = null;
+
+    foreach ($exprs as $expr) {
+        if ($expr instanceof ExprInterface) {
+            $result = $result ? $result->or($expr) : $expr;
+        }
+    }
+
+    if ($result === null) {
+        return Term::create(false);
+    } else {
+        return $result;
+    }
+}
+
+/**
+ * ANDs a list of expressions into a single expression.
+ *
+ * @psalm-pure
+ * @param iterable<ExprInterface> $exprs The expressions to AND.
+ * @return ExprInterface The created expression.
+ */
+function andAll(iterable $exprs): ExprInterface
+{
+    $result = null;
+
+    foreach ($exprs as $expr) {
+        if ($expr instanceof ExprInterface) {
+            $result = $result ? $result->and($expr) : $expr;
+        }
+    }
+
+    if ($result === null) {
+        return Term::create(false);
+    } else {
+        return $result;
+    }
+}
