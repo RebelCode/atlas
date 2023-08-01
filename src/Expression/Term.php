@@ -3,6 +3,7 @@
 namespace RebelCode\Atlas\Expression;
 
 use InvalidArgumentException;
+use Iterator;
 
 /** @psalm-immutable */
 class Term extends BaseExpr
@@ -82,6 +83,10 @@ class Term extends BaseExpr
     {
         if ($value instanceof ExprInterface) {
             return $value;
+        }
+
+        if ($value instanceof Iterator) {
+            $value = iterator_to_array($value);
         }
 
         $type = self::detectType($value);
