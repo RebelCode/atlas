@@ -186,7 +186,7 @@ function distinct(ColumnTerm $col): ColumnTerm
  * ORs a list of expressions into a single expression.
  *
  * @psalm-pure
- * @param iterable<ExprInterface> $exprs The expressions to OR.
+ * @param iterable<ExprInterface|null> $exprs The expressions to OR.
  * @return ExprInterface The created expression.
  */
 function orAll(iterable $exprs): ExprInterface
@@ -210,7 +210,7 @@ function orAll(iterable $exprs): ExprInterface
  * ANDs a list of expressions into a single expression.
  *
  * @psalm-pure
- * @param iterable<ExprInterface> $exprs The expressions to AND.
+ * @param iterable<ExprInterface|null> $exprs The expressions to AND.
  * @return ExprInterface The created expression.
  */
 function andAll(iterable $exprs): ExprInterface
