@@ -285,9 +285,9 @@ class TableTest extends TestCase
         $table = new Table($name = 'test', $this->createMock(Schema::class));
         $query = $table->drop($ifExists, $cascade);
 
-        $this->assertEquals($name,  $this->expose($query)->table);
-        $this->assertEquals($ifExists,  $this->expose($query)->ifExists);
-        $this->assertEquals($cascade,  $this->expose($query)->cascade);
+        $this->assertEquals($name, $this->expose($query)->table);
+        $this->assertEquals($ifExists, $this->expose($query)->ifExists);
+        $this->assertEquals($cascade, $this->expose($query)->cascade);
     }
 
     public function testSelect()
