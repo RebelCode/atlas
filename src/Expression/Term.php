@@ -4,6 +4,7 @@ namespace RebelCode\Atlas\Expression;
 
 use InvalidArgumentException;
 use Iterator;
+use Traversable;
 
 /** @psalm-immutable */
 class Term extends BaseExpr
@@ -85,18 +86,16 @@ class Term extends BaseExpr
             return $value;
         }
 
-        if ($value instanceof Iterator) {
-            $value = iterator_to_array($value);
-        }
-
         $type = self::detectType($value);
 
         if ($type === self::LIST) {
+            $list = [];
             foreach ($value as $i => $elem) {
                 if (!$elem instanceof self) {
-                    $value[$i] = self::create($elem);
+                    $list[$i] = self::create($elem);
                 }
             }
+            $value = $list;
         }
 
         return new self($type, $value);
@@ -123,7 +122,11 @@ class Term extends BaseExpr
             case "NULL":
                 return self::NULL;
             default:
-                throw new InvalidArgumentException('Unsupported type for term value: ' . gettype($value));
+                if ($value instanceof Traversable) {
+                    return self::LIST;
+                } else {
+                    throw new InvalidArgumentException('Unsupported type for term value: ' . gettype($value));
+                }
         }
     }
 }

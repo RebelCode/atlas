@@ -2,6 +2,7 @@
 
 namespace RebelCode\Atlas\Test\Expression;
 
+use ArrayIterator;
 use DateTime;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -41,6 +42,7 @@ class TermTest extends TestCase
             'true' => [true, Term::BOOLEAN],
             'false' => [false, Term::BOOLEAN],
             'list' => [[1, 2], Term::LIST],
+            'iterator' => [new ArrayIterator([1, 2, 3]), Term::LIST],
         ];
     }
 
@@ -78,6 +80,7 @@ class TermTest extends TestCase
             'true' => [true, true],
             'false' => [false, false],
             'list' => [[1, 2], [new Term(Term::NUMBER, 1), new Term(Term::NUMBER, 2)]],
+            'iterator' => [new ArrayIterator([1, 2]), [new Term(Term::NUMBER, 1), new Term(Term::NUMBER, 2)]],
         ];
     }
 
@@ -124,6 +127,7 @@ class TermTest extends TestCase
             'array with strings' => [Term::create(['foo', 'bar']), "('foo', 'bar')"],
             'array with bools' => [Term::create([true, false]), "(TRUE, FALSE)"],
             'array with mixed' => [Term::create(['foo', false, 1, null]), "('foo', FALSE, 1, NULL)"],
+            'iterator' => [Term::create(new ArrayIterator(['foo', 1])), "('foo', 1)"],
         ];
     }
 
