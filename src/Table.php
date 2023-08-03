@@ -130,7 +130,7 @@ class Table implements DataSource
             throw new DomainException("Column \"$column\" does not exist on table \"$this->name\"");
         }
 
-        return new ColumnTerm($this->name, $column);
+        return new ColumnTerm($this->alias ?? $this->name, $column);
     }
 
     /**
