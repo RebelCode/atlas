@@ -94,6 +94,18 @@ class TableTest extends TestCase
         $this->assertEquals('foo', $this->expose($col)->column);
     }
 
+    public function testColWithAlias()
+    {
+        $table = new Table('test');
+        $aliased = $table->as('foo');
+
+        $col = $aliased->col('bar');
+
+        $this->assertInstanceOf(ColumnTerm::class, $col);
+        $this->assertEquals('foo', $this->expose($col)->table);
+        $this->assertEquals('bar', $this->expose($col)->column);
+    }
+
     public function testColMagicGetter()
     {
         $table = new Table('test');
