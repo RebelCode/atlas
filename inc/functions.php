@@ -187,9 +187,9 @@ function distinct(ColumnTerm $col): ColumnTerm
  *
  * @psalm-pure
  * @param iterable<ExprInterface|null> $exprs The expressions to OR.
- * @return ExprInterface The created expression.
+ * @return ExprInterface|null The created expression.
  */
-function orAll(iterable $exprs): ExprInterface
+function orAll(iterable $exprs): ?ExprInterface
 {
     $result = null;
 
@@ -200,7 +200,7 @@ function orAll(iterable $exprs): ExprInterface
     }
 
     if ($result === null) {
-        return Term::create(false);
+        return null;
     } else {
         return $result;
     }
@@ -211,9 +211,9 @@ function orAll(iterable $exprs): ExprInterface
  *
  * @psalm-pure
  * @param iterable<ExprInterface|null> $exprs The expressions to AND.
- * @return ExprInterface The created expression.
+ * @return ExprInterface|null The created expression.
  */
-function andAll(iterable $exprs): ExprInterface
+function andAll(iterable $exprs): ?ExprInterface
 {
     $result = null;
 
@@ -224,7 +224,7 @@ function andAll(iterable $exprs): ExprInterface
     }
 
     if ($result === null) {
-        return Term::create(false);
+        return null;
     } else {
         return $result;
     }

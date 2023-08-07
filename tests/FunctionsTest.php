@@ -174,7 +174,7 @@ class FunctionsTest extends TestCase
         $baz = Term::create('baz');
 
         return [
-            'empty' => [[], Term::create(false)],
+            'empty' => [[], null],
             'one' => [[$foo], $foo],
             'two' => [[$foo, $bar], $foo->or($bar)],
             'two' => [[$foo, $bar, $baz], $foo->or($bar)->or($baz)],
@@ -196,7 +196,7 @@ class FunctionsTest extends TestCase
         $baz = Term::create('baz');
 
         return [
-            'empty' => [[], Term::create(false)],
+            'empty' => [[], null],
             'one' => [[$foo], $foo],
             'two' => [[$foo, $bar], $foo->and($bar)],
             'two' => [[$foo, $bar, $baz], $foo->and($bar)->and($baz)],
