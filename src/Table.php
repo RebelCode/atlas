@@ -236,7 +236,7 @@ class Table implements DataSource
     /**
      * Creates a SELECT query for the table.
      *
-     * @param array<Term|string> $columns The columns to select.
+     * @param array<ExprInterface|string> $columns The columns to select.
      * @param ExprInterface|null $where The WHERE condition.
      * @param Order[] $order The ORDER BY clause.
      * @param int|null $limit The LIMIT clause.
