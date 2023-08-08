@@ -53,6 +53,15 @@ class Order
             : $this;
     }
 
+    /** @psalm-param Order::* $default */
+    public function dir(string $order, string $default = self::ASC): Order
+    {
+        $order = strtoupper($order);
+        $order = ($order === self::ASC || $order === self::DESC) ? $order : $default;
+
+        return new self($this->column, $order);
+    }
+
     public static function by(string $column): Order
     {
         return new self($column);
