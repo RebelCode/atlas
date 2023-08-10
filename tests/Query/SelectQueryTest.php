@@ -138,6 +138,16 @@ class SelectQueryTest extends TestCase
         $this->assertSame(60, $this->expose($new)->offset);
     }
 
+    public function testPageNullLimit()
+    {
+        $query = new SelectQuery();
+        $new = $query->page(5, null);
+
+        $this->assertNotSame($query, $new);
+        $this->assertNull($this->expose($new)->limit);
+        $this->assertNull($this->expose($new)->offset);
+    }
+
     public function testExec()
     {
         $adapter = $this->createMock(DatabaseAdapter::class);

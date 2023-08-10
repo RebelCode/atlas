@@ -89,12 +89,18 @@ class SelectQuery extends Query implements DataSource
      *
      * @psalm-immutable
      * @param int $pageNum The page number, starting from 1.
-     * @param int $pageSize The page size (a.k.a. the limit).
+     * @param int|null $pageSize The page size (limit). If null, the limit and offset are removed from the query.
      * @return SelectQuery
      */
-    public function page(int $pageNum, int $pageSize): self
+    public function page(int $pageNum, ?int $pageSize): self
     {
-        return $this->offset(($pageNum - 1) * $pageSize)->limit($pageSize);
+        if ($pageSize === null) {
+            $offset = null;
+        } else {
+            $offset = ($pageNum - 1) * $pageSize;
+        }
+
+        return $this->limit($pageSize)->offset($offset);
     }
 
     /** @inheritdoc */
