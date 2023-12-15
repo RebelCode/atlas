@@ -178,8 +178,12 @@ abstract class F
      * @param list<mixed|ExprInterface> $arguments The call arguments.
      * @return FnExpr The created function expression.
      */
-    public static function __callStatic(string $operator, array $arguments): FnExpr
+    public static function __callStatic(string $fnName, array $args): FnExpr
     {
-        return new FnExpr($operator, array_map([Term::class, 'create'], $arguments));
+        if ($fnName === 'COUNT' && (count($args) === 0 || $args[0] === '*')) {
+            $args = [new Term(Term::SPECIAL, '*')];
+        }
+
+        return new FnExpr($fnName, array_map([Term::class, 'create'], $args));
     }
 }

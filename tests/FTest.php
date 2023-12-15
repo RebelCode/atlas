@@ -22,4 +22,22 @@ class FTest extends TestCase
         $this->assertEquals('foo', $this->expose($expr)->name);
         $this->assertSame([$term1, $term2], $this->expose($expr)->args);
     }
+
+    public function testCountNoArgs()
+    {
+        $count = F::COUNT();
+        $star = new Term(Term::SPECIAL, '*');
+
+        $this->assertEquals('COUNT', $this->expose($count)->name);
+        $this->assertEquals([$star], $this->expose($count)->args);
+    }
+
+    public function testCountWithStar()
+    {
+        $count = F::COUNT('*');
+        $star = new Term(Term::SPECIAL, '*');
+
+        $this->assertEquals('COUNT', $this->expose($count)->name);
+        $this->assertEquals([$star], $this->expose($count)->args);
+    }
 }

@@ -3,7 +3,7 @@
 namespace RebelCode\Atlas;
 
 // For use in select queries, for readability purposes.
-const ALL = ['*'];
+const ALL = '*';
 
 // Aliases for order constants
 const ASC = Order::ASC;

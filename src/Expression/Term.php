@@ -3,7 +3,6 @@
 namespace RebelCode\Atlas\Expression;
 
 use InvalidArgumentException;
-use Iterator;
 use Traversable;
 
 /** @psalm-immutable */
@@ -14,6 +13,7 @@ class Term extends BaseExpr
     public const BOOLEAN = 2;
     public const LIST = 3;
     public const NULL = 4;
+    public const SPECIAL = 5;
 
     /** @var mixed */
     protected $value;
@@ -67,6 +67,8 @@ class Term extends BaseExpr
                 }, $elements);
 
                 return '(' . implode(', ', $elementsStr) . ')';
+            case self::SPECIAL:
+                return $this->value;
             default:
                 throw new InvalidArgumentException("Term has unknown type: \"$this->type\"");
         }
