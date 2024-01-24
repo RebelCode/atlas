@@ -2,4 +2,4 @@
 
 namespace RebelCode\Atlas;
 
-class_alias(Order::class,  'RebelCode\Atlas\Group');
+class Group extends Order {}
