@@ -3,3 +3,4 @@
 /.php-cs-fixer.cache
 /build/
 /vendor/
+.phpactor.json
