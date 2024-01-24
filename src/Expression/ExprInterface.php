@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/** @psalm-immutable */
 interface ExprInterface
 {
     /**

@@ -7,7 +7,6 @@ abstract class Key
     /**
      * Converts the key into an SQL fragment string.
      *
-     * @psalm-mutation-free
      * @param string $name The name of the key.
      * @return string The SQL fragment string.
      */

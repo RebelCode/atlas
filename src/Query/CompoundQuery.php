@@ -9,8 +9,6 @@ use RebelCode\Atlas\Query;
  *
  * This is intended to allow multiple queries to be executed in a single call to the database adapter. Rendering the
  * queries to SQL will concatenate the SQL of each query and a semicolon after each query.
- *
- * @psalm-immutable
  */
 class CompoundQuery extends Query
 {

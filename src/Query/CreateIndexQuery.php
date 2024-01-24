@@ -10,7 +10,6 @@ use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Schema\Index;
 use Throwable;
 
-/** @psalm-immutable */
 class CreateIndexQuery extends Query
 {
     protected string $table;
@@ -37,10 +36,7 @@ class CreateIndexQuery extends Query
         $this->index = $index;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {

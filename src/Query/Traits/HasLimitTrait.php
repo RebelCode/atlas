@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
-/** @psalm-immutable */
 trait HasLimitTrait
 {
     protected ?int $limit = null;
@@ -10,7 +9,6 @@ trait HasLimitTrait
     /**
      * Creates a copy with a new limit.
      *
-     * @psalm-immutable
      * @param int|null $limit The limit.
      * @return static The new instance.
      */
@@ -24,7 +22,6 @@ trait HasLimitTrait
     /**
      * Compiles the LIMIT fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileLimit(): string

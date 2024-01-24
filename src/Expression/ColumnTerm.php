@@ -2,11 +2,7 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/**
- * An expression that represents a column name.
- *
- * @psalm-immutable
- */
+/** An expression that represents a column name. */
 class ColumnTerm extends BaseExpr
 {
     protected ?string $table;

@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
-/** @psalm-immutable */
 trait HasOffsetTrait
 {
     protected ?int $offset = null;
@@ -10,7 +9,6 @@ trait HasOffsetTrait
     /**
      * Creates a copy with a new selection offset.
      *
-     * @psalm-immutable
      * @param int|null $offset The new selection offset, or null or zero for no offset.
      * @return static The new instance.
      */
@@ -24,7 +22,6 @@ trait HasOffsetTrait
     /**
      * Compiles the OFFSET fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileOffset(): string

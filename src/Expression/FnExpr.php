@@ -2,11 +2,7 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/**
- * Represents a SQL function expression.
- *
- * @psalm-immutable
- */
+/** Represents a SQL function expression. */
 class FnExpr extends BaseExpr
 {
     protected string $name;

@@ -4,7 +4,6 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Join;
 
-/** @psalm-immutable */
 trait HasJoinsTrait
 {
     /** @var Join[] */
@@ -23,11 +22,7 @@ trait HasJoinsTrait
         return $new;
     }
 
-    /**
-     * Compiles the JOIN clauses into an SQL fragment.
-     *
-     * @psalm-mutation-free
-     */
+    /** Compiles the JOIN clauses into an SQL fragment. */
     protected function compileJoins(): string
     {
         if (empty($this->joins)) {

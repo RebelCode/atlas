@@ -4,7 +4,6 @@ namespace RebelCode\Atlas;
 
 use RebelCode\Atlas\Expression\ColumnTerm;
 
-/** @psalm-immutable */
 class Order
 {
     public const ASC = 'ASC';

@@ -4,7 +4,6 @@ namespace RebelCode\Atlas\Schema;
 
 use RebelCode\Atlas\Order;
 
-/** @psalm-immutable */
 class Index
 {
     protected bool $isUnique;

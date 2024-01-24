@@ -12,7 +12,6 @@ interface DataSource
     /**
      * Creates a copy with an alias.
      *
-     * @psalm-mutation-free
      * @param string|null $alias The string alias or null for no alias.
      * @return static The new instance.
      */
@@ -21,7 +20,6 @@ interface DataSource
     /**
      * Retrieves the data source's alias, if it has one.
      *
-     * @psalm-mutation-free
      * @return string|null The string alias or null if the data source has no alias.
      */
     public function getAlias(): ?string;
@@ -29,7 +27,6 @@ interface DataSource
     /**
      * Compiles the source into an SQL fragment.
      *
-     * @psalm-mutation-free
      * @return string The compiled SQL fragment.
      * @throws SqlCompileException If an error occurred while compiling.
      */

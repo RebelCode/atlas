@@ -12,7 +12,6 @@ use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use Throwable;
 
-/** @psalm-immutable */
 class SelectQuery extends Query implements DataSource
 {
     use Query\Traits\HasJoinsTrait;
@@ -59,7 +58,6 @@ class SelectQuery extends Query implements DataSource
     /**
      * Creates a copy with a different FROM clause.
      *
-     * @psalm-immutable
      * @param DataSource $source The source for the FROM clause.
      * @return static The new instance.
      */
@@ -73,7 +71,6 @@ class SelectQuery extends Query implements DataSource
     /**
      * Creates a copy with a different column selection.
      *
-     * @psalm-immutable
      * @param array<string|Term> $columns The new column selection.
      * @return static The new instance.
      */
@@ -87,7 +84,6 @@ class SelectQuery extends Query implements DataSource
     /**
      * Creates a copy with a new selection offset, based on the current limit and the given page number.
      *
-     * @psalm-immutable
      * @param int $pageNum The page number, starting from 1.
      * @param int|null $pageSize The page size (limit). If null, the limit and offset are removed from the query.
      * @return SelectQuery
@@ -117,10 +113,7 @@ class SelectQuery extends Query implements DataSource
         return $this->alias;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {
@@ -153,7 +146,6 @@ class SelectQuery extends Query implements DataSource
     /**
      * Compiles the list of columns.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileColumnList(): string

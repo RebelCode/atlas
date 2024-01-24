@@ -5,7 +5,6 @@ namespace RebelCode\Atlas\Query\Traits;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 
-/** @psalm-immutable */
 trait HasAssignmentTrait
 {
     /** @var array<string,scalar|ExprInterface> */
@@ -14,7 +13,6 @@ trait HasAssignmentTrait
     /**
      * Creates a copy with a different assign list.
      *
-     * @psalm-immutable
      * @param array<string,mixed|ExprInterface> $assign An assoc array that maps column names to the update values.
      * @return static The new instance.
      */
@@ -28,7 +26,6 @@ trait HasAssignmentTrait
     /**
      * Compiles an assignment list. Used by "UPDATE" and "INSERT ... ON DUPLICATE KEY UPDATE" queries.
      *
-     * @psalm-mutation-free
      * @param string $prefix The prefix for the compiled fragment. Typically, either SET or UPDATE.
      * @return string
      */

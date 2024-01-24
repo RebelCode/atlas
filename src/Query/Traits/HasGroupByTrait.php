@@ -5,7 +5,6 @@ namespace RebelCode\Atlas\Query\Traits;
 use InvalidArgumentException;
 use RebelCode\Atlas\Group;
 
-/** @psalm-immutable */
 trait HasGroupByTrait
 {
     /** @var Group[] */
@@ -14,7 +13,6 @@ trait HasGroupByTrait
     /**
      * Creates a copy with a new GROUP BY clause.
      *
-     * @psalm-immutable
      * @param Group[] $groups An array of {@link Group} instances.
      * @return static The new instance.
      */
@@ -28,7 +26,6 @@ trait HasGroupByTrait
     /**
      * Compiles the GROUP BY fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileGroupBy(): string

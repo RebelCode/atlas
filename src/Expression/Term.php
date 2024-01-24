@@ -5,7 +5,6 @@ namespace RebelCode\Atlas\Expression;
 use InvalidArgumentException;
 use Traversable;
 
-/** @psalm-immutable */
 class Term extends BaseExpr
 {
     public const NUMBER = 0;
@@ -77,8 +76,6 @@ class Term extends BaseExpr
     /**
      * Creates a term from a value, automatically detecting the type.
      *
-     * @psalm-mutation-free
-     *
      * @param mixed $value
      * @return ExprInterface
      */
@@ -103,10 +100,7 @@ class Term extends BaseExpr
         return new self($type, $value);
     }
 
-    /**
-     * @psalm-mutation-free
-     * @psalm-return Term::*
-     */
+    /** @psalm-return Term::* */
     public static function detectType($value): int
     {
         $type = gettype($value);

@@ -10,7 +10,6 @@ use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use Throwable;
 
-/** @psalm-immutable */
 class DeleteQuery extends Query
 {
     use Query\Traits\HasWhereTrait;
@@ -45,7 +44,6 @@ class DeleteQuery extends Query
     /**
      * Creates a copy with a different FROM clause.
      *
-     * @psalm-mutation-free
      * @param string $from The table name.
      * @return static The new instance.
      */
@@ -56,10 +54,7 @@ class DeleteQuery extends Query
         return $clone;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {

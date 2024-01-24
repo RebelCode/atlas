@@ -16,7 +16,6 @@ use RebelCode\Atlas\Query\InsertQuery;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Query\UpdateQuery;
 
-/** @psalm-immutable */
 class Table implements DataSource
 {
     protected string $name;

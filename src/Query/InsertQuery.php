@@ -9,7 +9,6 @@ use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Query;
 use Throwable;
 
-/** @psalm-immutable */
 class InsertQuery extends Query
 {
     use Query\Traits\HasAssignmentTrait {
@@ -48,7 +47,6 @@ class InsertQuery extends Query
     /**
      * Creates a copy with a new table to insert into.
      *
-     * @psalm-mutation-free
      * @param string $table The table to insert into.
      * @return self The new instance.
      */
@@ -62,7 +60,6 @@ class InsertQuery extends Query
     /**
      * Creates a copy with new columns to insert into.
      *
-     * @psalm-mutation-free
      * @param string[] $columns The columns to insert into.
      * @return self The new instance.
      */
@@ -76,7 +73,6 @@ class InsertQuery extends Query
     /**
      * Creates a copy with new values to insert.
      *
-     * @psalm-mutation-free
      * @param array<string,mixed>[] $values The values to insert.
      * @return self The new instance.
      */
@@ -87,10 +83,7 @@ class InsertQuery extends Query
         return $new;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {
@@ -121,7 +114,6 @@ class InsertQuery extends Query
     /**
      * Compiles the VALUES fragment of the INSERT query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileInsertValues(): string

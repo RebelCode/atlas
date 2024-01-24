@@ -4,11 +4,7 @@ namespace RebelCode\Atlas;
 
 use RebelCode\Atlas\Exception\DatabaseException;
 
-/**
- * An adapter for a database connection that allows queries created by Atlas to be executed.
- *
- * @psalm-immutable
- */
+/** An adapter for a database connection that allows queries created by Atlas to be executed. */
 interface DatabaseAdapter
 {
     /**

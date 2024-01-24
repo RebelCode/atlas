@@ -6,7 +6,6 @@ use LogicException;
 use RebelCode\Atlas\Exception\DatabaseException;
 use RebelCode\Atlas\Exception\QuerySqlException;
 
-/** @psalm-immutable */
 abstract class Query
 {
     protected ?DatabaseAdapter $adapter;
@@ -39,7 +38,6 @@ abstract class Query
     /**
      * Compiles the query into an SQL string.
      *
-     * @psalm-mutation-free
      * @return string The compiled SQL string.
      * @throws QuerySqlException If an error occurred while compiling the SQL.
      */

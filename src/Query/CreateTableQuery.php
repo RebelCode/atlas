@@ -10,7 +10,6 @@ use RebelCode\Atlas\Schema;
 use Throwable;
 use UnexpectedValueException;
 
-/** @psalm-immutable */
 class CreateTableQuery extends Query
 {
     protected string $name;
@@ -41,10 +40,7 @@ class CreateTableQuery extends Query
         $this->collate = $collate;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {
@@ -74,8 +70,6 @@ class CreateTableQuery extends Query
 
     /**
      * Compiles the schema for a table.
-     *
-     * @psalm-mutation-free
      *
      * @param Schema $schema The table schema.
      * @return string

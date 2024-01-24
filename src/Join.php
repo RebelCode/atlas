@@ -4,7 +4,6 @@ namespace RebelCode\Atlas;
 
 use RebelCode\Atlas\Expression\ExprInterface;
 
-/** @psalm-immutable */
 class Join
 {
     const INNER = 'INNER';

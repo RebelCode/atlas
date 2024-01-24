@@ -4,7 +4,6 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Expression\ExprInterface;
 
-/** @psalm-immutable */
 trait HasWhereTrait
 {
     protected ?ExprInterface $where = null;
@@ -12,7 +11,6 @@ trait HasWhereTrait
     /**
      * Creates a copy with a new WHERE condition.
      *
-     * @psalm-immutable
      * @param ExprInterface|null $where The new WHERE condition, or null for no condition.
      * @return static The new instance.
      */
@@ -26,7 +24,6 @@ trait HasWhereTrait
     /**
      * Compiles the WHERE fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileWhere(): string

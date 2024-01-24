@@ -10,7 +10,6 @@ use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
 use Throwable;
 
-/** @psalm-immutable */
 class UpdateQuery extends Query
 {
     use Query\Traits\HasWhereTrait;
@@ -50,7 +49,6 @@ class UpdateQuery extends Query
     /**
      * Creates a copy with a different table.
      *
-     * @psalm-immutable
      * @param string $table The table to update.
      * @return static The new instance.
      */
@@ -61,10 +59,7 @@ class UpdateQuery extends Query
         return $new;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {

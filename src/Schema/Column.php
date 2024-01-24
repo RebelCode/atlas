@@ -5,7 +5,6 @@ namespace RebelCode\Atlas\Schema;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
 
-/** @psalm-immutable */
 class Column
 {
     protected string $type;

@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/** @psalm-immutable */
 abstract class BaseExpr implements ExprInterface
 {
     protected ?string $alias = null;

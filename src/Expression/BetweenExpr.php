@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/** @psalm-immutable */
 class BetweenExpr extends BaseExpr
 {
     const BETWEEN = 'BETWEEN';

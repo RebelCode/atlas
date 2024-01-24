@@ -6,7 +6,6 @@ use RebelCode\Atlas\Schema\Column;
 use RebelCode\Atlas\Schema\Index;
 use RebelCode\Atlas\Schema\Key;
 
-/** @psalm-immutable */
 class Schema
 {
     /** @var array<string,Column> */

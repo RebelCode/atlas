@@ -4,7 +4,6 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Expression\ExprInterface;
 
-/** @psalm-immutable */
 trait HasHavingTrait
 {
     protected ?ExprInterface $having = null;
@@ -12,7 +11,6 @@ trait HasHavingTrait
     /**
      * Creates a copy with a new HAVING condition.
      *
-     * @psalm-immutable
      * @param ExprInterface|null $having The new HAVING condition.
      * @return static The new instance.
      */
@@ -26,7 +24,6 @@ trait HasHavingTrait
     /**
      * Compiles the HAVING fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileHaving(): string

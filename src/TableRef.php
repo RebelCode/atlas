@@ -4,11 +4,7 @@ namespace RebelCode\Atlas;
 
 use RebelCode\Atlas\Expression\ColumnTerm;
 
-/**
- * A data source that refers to a table by name. This is useful when the {@link Table} instance cannot be obtained.
- *
- * @psalm-immutable
- */
+/** A data source that refers to a table by name. This is useful when the {@link Table} instance cannot be obtained. */
 class TableRef implements DataSource
 {
     protected string $name;

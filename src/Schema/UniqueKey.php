@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Schema;
 
-/** @psalm-immutable  */
 class UniqueKey extends Key
 {
     /** @var string[] */

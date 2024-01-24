@@ -8,7 +8,6 @@ use RebelCode\Atlas\Exception\QuerySqlException;
 use RebelCode\Atlas\Query;
 use Throwable;
 
-/** @psalm-immutable */
 class DropTableQuery extends Query
 {
     protected string $table;
@@ -35,10 +34,7 @@ class DropTableQuery extends Query
         $this->cascade = $cascade;
     }
 
-    /**
-     * @inheritDoc
-     * @psalm-mutation-free
-     */
+    /** @inheritDoc */
     public function toSql(): string
     {
         try {

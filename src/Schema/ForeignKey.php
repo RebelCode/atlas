@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Schema;
 
-/** @psalm-immutable */
 class ForeignKey extends Key
 {
     public const SET_NULL = 'SET NULL';

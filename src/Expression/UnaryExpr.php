@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Expression;
 
-/** @psalm-immutable */
 class UnaryExpr extends BaseExpr
 {
     public const NOT = '!';

@@ -4,7 +4,6 @@ namespace RebelCode\Atlas\Query\Traits;
 
 use RebelCode\Atlas\Order;
 
-/** @psalm-immutable */
 trait HasOrderTrait
 {
     /** @var Order[] */
@@ -13,7 +12,6 @@ trait HasOrderTrait
     /**
      * Creates a copy with new ordering.
      *
-     * @psalm-immutable
      * @param Order[] $order A list of {@link Order} instances.
      * @return static The new instance.
      */
@@ -27,7 +25,6 @@ trait HasOrderTrait
     /**
      * Compiles the ORDER BY fragment of an SQL query.
      *
-     * @psalm-mutation-free
      * @return string
      */
     protected function compileOrder(): string
