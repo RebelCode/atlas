@@ -65,6 +65,22 @@ class SelectQueryTest extends TestCase
         $this->assertSame($source, $this->expose($new)->source);
     }
 
+    public function testCalcFoundRows()
+    {
+        $query = new SelectQuery();
+
+        $new1 = $query->calcFoundRows();
+
+        $this->assertNotSame($query, $new1);
+        $this->assertTrue($this->expose($new1)->calcFoundRows);
+
+        $new2 = $query->calcFoundRows(false);
+
+        $this->assertNotSame($query, $new2);
+        $this->assertNotSame($new1, $new2);
+        $this->assertFalse($this->expose($new2)->calcFoundRows);
+    }
+
     public function testColumns()
     {
         $query = new SelectQuery();

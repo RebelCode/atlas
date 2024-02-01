@@ -26,6 +26,7 @@ class SelectQuery extends Query implements DataSource
     protected ?string $alias = null;
     /** @var array<string|Term> */
     protected array $columns = [];
+    protected bool $calcFoundRows = false;
 
     /**
      * Constructor.
@@ -82,6 +83,20 @@ class SelectQuery extends Query implements DataSource
     }
 
     /**
+     * Creates a copy with a different calcFoundRows setting.
+     *
+     * @param bool $calcFoundRows Whether to calculate the number of rows that
+     *        would have been returned if there was no LIMIT clause.
+     * @return static The new instance.
+     */
+    public function calcFoundRows(bool $calcFoundRows = true): self
+    {
+        $new = clone $this;
+        $new->calcFoundRows = $calcFoundRows;
+        return $new;
+    }
+
+    /**
      * Creates a copy with a new selection offset, based on the current limit and the given page number.
      *
      * @param int $pageNum The page number, starting from 1.
@@ -121,8 +136,10 @@ class SelectQuery extends Query implements DataSource
                 ? 'FROM ' . $this->source->compileSource()
                 : '';
 
+            $calc = $this->calcFoundRows ? 'SQL_CALC_FOUND_ROWS ' : '';
+
             $result = [
-                'SELECT ' . $this->compileColumnList(),
+                'SELECT ' . $calc . $this->compileColumnList(),
                 $from,
                 $this->compileJoins(),
                 $this->compileWhere(),
