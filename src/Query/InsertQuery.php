@@ -16,6 +16,7 @@ class InsertQuery extends Query
     }
 
     protected string $into;
+    protected bool $replace;
     /** @var string[] */
     protected array $columns;
     /** @var list<array<string,mixed>> */
@@ -35,13 +36,15 @@ class InsertQuery extends Query
         string $into = '',
         array $columns = [],
         array $values = [],
-        array $assign = []
+        array $assign = [],
+        bool $replace = false
     ) {
         parent::__construct($adapter);
         $this->into = $into;
         $this->columns = $columns;
         $this->values = $values;
         $this->assign = $assign;
+        $this->replace = $replace;
     }
 
     /**
@@ -83,6 +86,19 @@ class InsertQuery extends Query
         return $new;
     }
 
+    /**
+     * Changes the INSERT query to a REPLACE query, or vice-versa.
+     *
+     * @param bool $replace Whether to use REPLACE instead of INSERT.
+     * @return self The new instance.
+     */
+    public function replace(bool $replace = true): self
+    {
+        $new = clone $this;
+        $new->replace = $replace;
+        return $new;
+    }
+
     /** @inheritDoc */
     public function toSql(): string
     {
@@ -99,7 +115,8 @@ class InsertQuery extends Query
             $valuesStr = $this->compileInsertValues();
             $onDupeKey = $this->compileAssignment('UPDATE');
 
-            $result = "INSERT INTO `$table` ($columnsStr) VALUES $valuesStr";
+            $type = $this->replace ? 'REPLACE' : 'INSERT';
+            $result = "$type INTO `$table` ($columnsStr) VALUES $valuesStr";
 
             if (!empty($onDupeKey)) {
                 $result .= ' ON DUPLICATE KEY ' . $onDupeKey;

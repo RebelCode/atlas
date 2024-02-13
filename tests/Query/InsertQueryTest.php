@@ -71,6 +71,15 @@ class InsertQueryTest extends TestCase
         $this->assertEquals($assign, $this->expose($new)->assign);
     }
 
+    public function testReplace()
+    {
+        $query = new InsertQuery();
+        $new = $query->replace();
+
+        $this->assertNotSame($query, $new);
+        $this->assertTrue($this->expose($new)->replace);
+    }
+
     public function provideExecNumRowsAffected()
     {
         return [
@@ -147,6 +156,15 @@ class InsertQueryTest extends TestCase
 
         $actual = $insert->toSql();
         $expected = "INSERT INTO `foo` (`a`, `b`, `c`) VALUES (1, 2, 3) ON DUPLICATE KEY UPDATE `a` = 'A', `b` = BBB";
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testCompileReplace()
+    {
+        $insert = new InsertQuery(null, 'foo', ['a', 'b'], [[1, 2]], [], true);
+        $actual = $insert->toSql();
+        $expected = "REPLACE INTO `foo` (`a`, `b`) VALUES (1, 2)";
 
         $this->assertEquals($expected, $actual);
     }
