@@ -54,7 +54,8 @@ class Term extends BaseExpr
             case self::NUMBER:
                 return (string) $this->value;
             case self::STRING:
-                return "'$this->value'";
+                $esc = addslashes((string) $this->value);
+                return "'$esc'";
             case self::BOOLEAN:
                 return $this->value ? 'TRUE' : 'FALSE';
             case self::LIST:
