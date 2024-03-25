@@ -6,7 +6,6 @@ use DomainException;
 use RebelCode\Atlas\Exception\NoTableSchemaException;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
-use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Query\CompoundQuery;
 use RebelCode\Atlas\Query\CreateIndexQuery;
 use RebelCode\Atlas\Query\CreateTableQuery;
