@@ -7,7 +7,7 @@ use RebelCode\Atlas\Expression\Term;
 
 trait HasAssignmentTrait
 {
-    /** @var array<string,scalar|ExprInterface> */
+    /** @var array<string,mixed> */
     protected array $assign;
 
     /**

@@ -28,8 +28,8 @@ class InsertQuery extends Query
      * @param DatabaseAdapter|null $adapter Optional database adapter.
      * @param string $into The table to insert into.
      * @param string[] $columns The columns to insert into.
-     * @param array<string,mixed>[] $values A list of associative arrays, each representing a row to be inserted.
-     * @param array<string, mixed> $assign Optional assignment list to use in the "ON DUPLICATE KEY" clause.
+     * @param list<array<string,mixed>> $values A list of associative arrays, each representing a row to be inserted.
+     * @param array<string,mixed> $assign Optional assignment list to use in the "ON DUPLICATE KEY" clause.
      */
     public function __construct(
         ?DatabaseAdapter $adapter = null,
