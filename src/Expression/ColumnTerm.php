@@ -65,4 +65,9 @@ class ColumnTerm extends BaseExpr
 
         return $result;
     }
+
+    public function __toString(): string
+    {
+        return $this->toSql();
+    }
 }

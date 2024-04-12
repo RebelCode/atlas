@@ -36,7 +36,7 @@ trait HasGroupByTrait
 
         $groupParts = [];
         foreach ($this->groups as $group) {
-            $groupParts[] = "`{$group->getColumn()}` {$group->getSort()}";
+            $groupParts[] = $group->getColumn() . ' ' . $group->getSort();
         }
 
         return 'GROUP BY ' . implode(', ', $groupParts);

@@ -9,7 +9,7 @@ class Order
     public const ASC = 'ASC';
     public const DESC = 'DESC';
 
-    protected string $column;
+    protected ColumnTerm $column;
     /** @psalm-var Order::* */
     protected string $sort;
 
@@ -23,11 +23,11 @@ class Order
      */
     public function __construct($column, string $sort = self::ASC)
     {
-        $this->column = $column instanceof ColumnTerm ? $column->getName() : $column;
+        $this->column = $column instanceof ColumnTerm ? $column : new ColumnTerm(null, $column);
         $this->sort = $sort;
     }
 
-    public function getColumn(): string
+    public function getColumn(): ColumnTerm
     {
         return $this->column;
     }

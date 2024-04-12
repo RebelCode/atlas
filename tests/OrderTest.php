@@ -8,38 +8,30 @@ use PHPUnit\Framework\TestCase;
 
 class OrderTest extends TestCase
 {
-    public function testConstructorNoSort()
+    public static function provideDataForCtorTest()
     {
-        $order = new Order($column = 'foo');
-
-        $this->assertEquals($column, $order->getColumn());
-        $this->assertEquals(Order::ASC, $order->getSort());
-    }
-
-    public function testConstructorAsc()
-    {
-        $order = new Order($column = 'foo', Order::ASC);
-
-        $this->assertEquals($column, $order->getColumn());
-        $this->assertEquals(Order::ASC, $order->getSort());
-    }
-
-    public function testConstructorDesc()
-    {
-        $order = new Order($column = 'foo', Order::DESC);
-
-        $this->assertEquals($column, $order->getColumn());
-        $this->assertEquals(Order::DESC, $order->getSort());
-    }
-
-    public function testConstructorWithTerm()
-    {
-        $columnTerm = $this->createMock(ColumnTerm::class);
-        $columnTerm->method('getName')->willReturn($columnName = 'foo');
-
-        $order = new Order($columnTerm);
-
-        $this->assertEquals($columnName, $order->getColumn());
+        return [
+            'no sort' => [
+                new Order('foo'),
+                new ColumnTerm(null, 'foo'),
+                Order::ASC
+            ],
+            'asc' => [
+                new Order('foo', Order::ASC), 
+                new ColumnTerm(null, 'foo'), 
+                Order::ASC
+            ],
+            'desc' => [
+                new Order('foo', Order::DESC), 
+                new ColumnTerm(null, 'foo'), 
+                Order::DESC
+            ],
+            'column term' => [
+                new Order($ct = new ColumnTerm(null, 'foo')), 
+                $ct, 
+                Order::ASC
+            ],
+        ];
     }
 
     public function provideDataForTestDir(): array
