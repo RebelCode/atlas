@@ -5,8 +5,10 @@ namespace RebelCode\Atlas\Query;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\DataSource;
 use RebelCode\Atlas\Exception\QuerySqlException;
+use RebelCode\Atlas\Expression\CallbackExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\FnExpr;
 use RebelCode\Atlas\Expression\Term;
 use RebelCode\Atlas\Order;
 use RebelCode\Atlas\Query;
@@ -126,6 +128,20 @@ class SelectQuery extends Query implements DataSource
     public function getAlias(): ?string
     {
         return $this->alias;
+    }
+
+    public function exists(): ExprInterface
+    {
+        return new FnExpr('EXISTS', [
+            new CallbackExpr(fn () => $this->toSql()),
+        ]);
+    }
+
+    public function notExists(): ExprInterface
+    {
+        return new FnExpr('NOT EXISTS', [
+            new CallbackExpr(fn () => $this->toSql()),
+        ]);
     }
 
     /** @inheritDoc */

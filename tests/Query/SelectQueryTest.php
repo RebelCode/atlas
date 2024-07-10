@@ -14,6 +14,9 @@ use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
+use function RebelCode\Atlas\col;
+use function RebelCode\Atlas\table;
+
 class SelectQueryTest extends TestCase
 {
     use ReflectionHelper;
@@ -445,5 +448,23 @@ class SelectQueryTest extends TestCase
         $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testExists()
+    {
+        $query = new SelectQuery();
+        $query = $query->from(table('test'))->where(col('role')->eq('admin'));
+        $exists = $query->exists();
+
+        $this->assertEquals("EXISTS(SELECT * FROM `test` WHERE (`role` = 'admin'))", $exists->toSql());
+    }
+
+    public function testNotExists()
+    {
+        $query = new SelectQuery();
+        $query = $query->from(table('test'))->where(col('role')->eq('admin'));
+        $exists = $query->notExists();
+
+        $this->assertEquals("NOT EXISTS(SELECT * FROM `test` WHERE (`role` = 'admin'))", $exists->toSql());
     }
 }
