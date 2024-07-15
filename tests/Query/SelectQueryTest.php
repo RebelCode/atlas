@@ -2,11 +2,14 @@
 
 namespace RebelCode\Atlas\Test\Query;
 
+use PHPUnit\Framework\MockObject\MockClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RebelCode\Atlas\DatabaseAdapter;
 use RebelCode\Atlas\DataSource;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
+use RebelCode\Atlas\Expression\VarExpr;
 use RebelCode\Atlas\Group;
 use RebelCode\Atlas\Join;
 use RebelCode\Atlas\Order;
@@ -14,6 +17,8 @@ use RebelCode\Atlas\Query;
 use RebelCode\Atlas\Query\SelectQuery;
 use RebelCode\Atlas\Test\Helpers\ReflectionHelper;
 
+use function RebelCode\Atlas\andAll;
+use function RebelCode\Atlas\arg;
 use function RebelCode\Atlas\col;
 use function RebelCode\Atlas\table;
 
@@ -466,5 +471,32 @@ class SelectQueryTest extends TestCase
         $exists = $query->notExists();
 
         $this->assertEquals("NOT EXISTS(SELECT * FROM `test` WHERE (`role` = 'admin'))", $exists->toSql());
+    }
+
+    public function testWithVars()
+    {
+        $args = ['foo' => 'VALUE1', 'bar' => 'VALUE2'];
+
+        $adapter = $this->createMock(DatabaseAdapter::class);
+        $adapter->expects($this->exactly(2))
+            ->method('getPlaceholder')
+            ->withConsecutive(['bar', 'VALUE2'], ['foo', 'VALUE1'])
+            ->willReturnOnConsecutiveCalls('<bar>', '<foo>');
+
+        $adapter->expects($this->once())
+            ->method('queryResults')
+            ->with(
+                'SELECT * FROM `test` WHERE ((`name` = <bar>) AND (`age` = <foo>))',
+                ['VALUE2', 'VALUE1']
+            );
+
+        $query = (new SelectQuery($adapter))
+            ->from(table('test'))
+            ->where(andAll([
+                col('name')->eq(arg('bar')),
+                col('age')->eq(arg('foo')),
+            ]));
+
+        $query->exec($args);
     }
 }

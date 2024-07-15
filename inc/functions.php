@@ -8,6 +8,7 @@ use RebelCode\Atlas\Expression\BinaryExpr;
 use RebelCode\Atlas\Expression\ColumnTerm;
 use RebelCode\Atlas\Expression\ExprInterface;
 use RebelCode\Atlas\Expression\Term;
+use RebelCode\Atlas\Expression\VarExpr as ArgExpr;
 
 /**
  * Creates a new column term.
@@ -217,4 +218,9 @@ function andAll(iterable $exprs): ?ExprInterface
     } else {
         return $result;
     }
+}
+
+function arg(string $name): ArgExpr
+{
+    return new ArgExpr($name);
 }

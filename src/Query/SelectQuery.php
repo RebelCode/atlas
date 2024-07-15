@@ -220,8 +220,10 @@ class SelectQuery extends Query implements DataSource
      *
      * @return array<string,mixed>[] A list of rows, where each row is a map of column names to values.
      */
-    public function exec(): array
+    public function exec(array $args = []): array
     {
-        return $this->getAdapter()->queryResults($this->toSql());
+        [$sql, $values] = $this->templateVars($this->toSql(), $args);
+
+        return $this->getAdapter()->queryResults($sql, $values);
     }
 }

@@ -75,8 +75,10 @@ class CreateIndexQuery extends Query
      *
      * @return bool True if the index was created successfully, false otherwise.
      */
-    public function exec(): bool
+    public function exec(array $args = []): bool
     {
-        return $this->getAdapter()->query($this->toSql());
+        [$sql, $values] = $this->templateVars($this->toSql(), $args);
+
+        return $this->getAdapter()->query($sql, $values);
     }
 }

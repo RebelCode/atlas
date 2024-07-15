@@ -153,10 +153,12 @@ class InsertQuery extends Query
      *
      * @return int|null The last inserted ID, or null if no rows were inserted.
      */
-    public function exec(): ?int
+    public function exec(array $args = []): ?int
     {
+        [$sql, $values] = $this->templateVars($this->toSql(), $args);
+
         $adapter = $this->getAdapter();
-        $numRows = $adapter->queryNumRows($this->toSql());
+        $numRows = $adapter->queryNumRows($sql, $values);
 
         if ($numRows > 0) {
             return $adapter->getInsertId();

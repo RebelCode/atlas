@@ -83,8 +83,10 @@ class UpdateQuery extends Query
      * @return int The number of rows affected by the query.
      * @throws DatabaseException If an error occurred while executing the query.
      */
-    public function exec(): int
+    public function exec(array $args = []): int
     {
-        return $this->getAdapter()->queryNumRows($this->toSql());
+        [$sql, $values] = $this->templateVars($this->toSql(), $args);
+
+        return $this->getAdapter()->queryNumRows($sql, $values);
     }
 }

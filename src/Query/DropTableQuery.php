@@ -65,8 +65,10 @@ class DropTableQuery extends Query
      *
      * @return bool True if the table was dropped, false if not.
      */
-    public function exec(): bool
+    public function exec(array $args = []): bool
     {
-        return $this->getAdapter()->query($this->toSql());
+        [$sql, $values] = $this->templateVars($this->toSql(), $args);
+
+        return $this->getAdapter()->query($sql, $values);
     }
 }

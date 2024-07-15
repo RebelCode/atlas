@@ -48,11 +48,11 @@ class CompoundQuery extends Query
     }
 
     /** @inheritDoc */
-    public function exec()
+    public function exec(array $args = [])
     {
         $results = [];
         foreach ($this->queries as $query) {
-            $results[] = $query->exec();
+            $results[] = $query->exec($args);
         }
 
         return $results;
