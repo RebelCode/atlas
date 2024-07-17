@@ -314,7 +314,7 @@ class SelectQueryTest extends TestCase
             new Group('baz', Group::DESC),
         ]);
 
-        $expected = 'SELECT * FROM table GROUP BY `foo` ASC, `bar` ASC, `baz` DESC';
+        $expected = 'SELECT * FROM table GROUP BY `foo`, `bar` ASC, `baz` DESC';
         $actual = $query->toSql();
 
         $this->assertEquals($expected, $actual);

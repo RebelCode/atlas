@@ -2,7 +2,6 @@
 
 namespace RebelCode\Atlas\Query\Traits;
 
-use InvalidArgumentException;
 use RebelCode\Atlas\Group;
 
 trait HasGroupByTrait
@@ -36,7 +35,13 @@ trait HasGroupByTrait
 
         $groupParts = [];
         foreach ($this->groups as $group) {
-            $groupParts[] = $group->getColumn() . ' ' . $group->getSort();
+            $col = $group->getColumn();
+            $sort = $group->getSort();
+            if ($sort === null) {
+                $groupParts[] = $col;
+            } else {
+                $groupParts[] = "$col $sort";
+            }
         }
 
         return 'GROUP BY ' . implode(', ', $groupParts);

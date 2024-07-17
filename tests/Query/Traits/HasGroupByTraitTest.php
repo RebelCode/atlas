@@ -29,11 +29,12 @@ class HasGroupByTraitTest extends TestCase
     public function testCompile()
     {
         $mock = $this->getMockForTrait(HasGroupByTrait::class)->groupBy([
-            Group::by('foo')->asc(),
-            Group::by('bar')->desc(),
+            Group::by('foo'),
+            Group::by('bar')->asc(),
+            Group::by('baz')->desc(),
         ]);
 
-        $this->assertEquals('GROUP BY `foo` ASC, `bar` DESC', $this->expose($mock)->compileGroupBy());
+        $this->assertEquals('GROUP BY `foo`, `bar` ASC, `baz` DESC', $this->expose($mock)->compileGroupBy());
     }
 
     public function testCompileNoGroups()
